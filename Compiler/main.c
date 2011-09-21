@@ -7,11 +7,11 @@
  * Criado em: 15/09/2011
  * 		Autores:
  *     		Bruno Pezzolo dos Santos, 5948816
- *      	Carla Guillen Gomes, 5948816
+ *      	Carla Guillen Gomes, 5691366
  */
 
 #include <stdlib.h>
-#include <stdio.h>]
+#include <stdio.h>
 #include "lexico.h"
 
 int main(int argc, char **argv) {
