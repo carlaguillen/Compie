@@ -14,7 +14,9 @@
 typedef struct {
 	int type;
 	char *lexeme;
-	int index_on_table;
+	int value; // index_on_table for TYPE_IDENTIFIER, OPER, RESERV or value for TYPE_NUMBER / not used when TYPE_STRING
 } Token;
+
+Token *token; // global
 
 #endif /* TOKEN_H_ */

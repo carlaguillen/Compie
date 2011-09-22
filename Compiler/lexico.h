@@ -14,9 +14,9 @@
 #define LEXICO_H_
 
 #include <stdio.h>
-
-extern FILE *file;
-
-extern void getNextTokenInto(char *token);
+#include "token.h"
 
 #endif /* LEXICO_H_ */
+
+
+//BRUNO

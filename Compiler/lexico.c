@@ -13,20 +13,13 @@
 #include "lexico.h"
 #include "token.h"
 
-/*
-void getNextTokenInto(char *token) {
-
-}
-*/
-
-Token get_next_token() {
-	Token * token;
-	token = transducer_get_next_token();
-	complete_token(token);
+void get_next_token() {
+	transducer_get_next_token();
+	complete_token();
 	return token; 
 }
 
-void complete_token(Token * token) {
+void complete_token() {
 	if (token->type == IDENT_OR_RESERV) {
 		int index_of_reserved = id_of_reserved(token.lexeme);
 		if (index_of_reserved != -1) {

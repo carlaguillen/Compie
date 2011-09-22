@@ -13,11 +13,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "lexico.h"
+#include "file_reader.h"
 
 int main(int argc, char **argv) {
-	Token* token;
+
+	// init file_reader
+	init_file_reader(&path);
+
 	do {
-		token = get_next_token(); // função do analisador lexico
+		get_next_token(); // função do analisador lexico
 		imprime_token(token);
 	} while (token.type != END_0F_FILE)
 
