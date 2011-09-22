@@ -15,6 +15,12 @@
 #include "lexico.h"
 
 int main(int argc, char **argv) {
-	while(getchar() != '\n');
+	Token* token;
+	do {
+		token = get_next_token(); // função do analisador lexico
+		imprime_token(token);
+	} while (token.type != END_0F_FILE)
+
+	print_table_identifiers();
 	return 0;
 }
