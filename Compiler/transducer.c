@@ -13,7 +13,7 @@ void transducer_get_next_token() {
 			char *look_ahead_char = look_ahead();
 			strcat (lexeme, current_char);
 		}
-		token_type = IDENT_OR_RESERV;
+		token_type = TTYPE_IDENT_OR_RESERV;
 	} else if (true) {
 		//todo..
 		;

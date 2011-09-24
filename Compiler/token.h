@@ -26,7 +26,7 @@
 typedef struct {
 	int type;
 	char *lexeme;
-	int value; // index_on_table for TTYPE_IDENTIFIER, TTYPE_OPERATOR, TTYPE_RESERVED_WORD or value for TYPE_NUMBER / not used when TYPE_STRING
+	int value; // index_on_table for TTYPE_IDENTIFIER, TTYPE_OPERATOR, TTYPE_RESERVED_WORD or value for TTYPE_NUMBER / not used when TTYPE_STRING
 } Token;
 
 extern Token *token; // global

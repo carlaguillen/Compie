@@ -43,7 +43,7 @@ int search_reserved_words_table(char * data) {
 	return INDEX_NOT_FOUND;
 }
 
-int search_special_characters_table(char * data) {
+int search_operators_table(char * data) {
 	int i;
 	for(i = 0; i < lenght(operators_table); i++)
 		if(strcmp(operators_table[i], data) == 0) return i;

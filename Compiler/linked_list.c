@@ -2,7 +2,7 @@
  *	 		PCS 2056 - Linguagens e Compiladores
  * =======================================================
  *
- * linked_list.c
+ * linked_list.c - Linked list
  *
  * Created on: 22/09/2011
  * 		Authors:
@@ -56,6 +56,7 @@ int add_list(char * data, List * list){
       index++;
     }
     current->next = createnode(data);
+    index++;
   }
   return index;
 }

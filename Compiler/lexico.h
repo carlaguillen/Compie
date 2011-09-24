@@ -2,10 +2,10 @@
  *	 		PCS 2056 - Linguagens e Compiladores
  * =======================================================
  *
- * lexico.h - Analisador léxico
+ * lexico.h - Lexical analyzer
  *
- * Criado em: 15/09/2011
- * 		Autores:
+ * Criado on: 15/09/2011
+ * 		Authors:
  *     		Bruno Pezzolo dos Santos, 5948816
  *      	Carla Guillen Gomes, 5691366
  */

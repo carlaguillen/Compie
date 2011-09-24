@@ -16,7 +16,7 @@
 /* 						PUBLIC							   */
 /***********************************************************/
 
-Token *token
+Token *token;
 
 void init_token() {
 	token = (Token *) malloc(sizeof(Token));

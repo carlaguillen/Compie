@@ -2,7 +2,7 @@
  *	 		PCS 2056 - Linguagens e Compiladores
  * =======================================================
  *
- * linked_list.h
+ * linked_list.h - Linked list
  *
  * Created on: 22/09/2011
  * 		Authors:
