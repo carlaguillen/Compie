@@ -2,7 +2,7 @@
  *	 		PCS 2056 - Linguagens e Compiladores
  * =======================================================
  *
- * Analisador lÃ©xico
+ * lexico.h - Analisador léxico
  *
  * Criado em: 15/09/2011
  * 		Autores:
