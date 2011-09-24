@@ -19,7 +19,7 @@
 #define lenght(array) (sizeof(array)/sizeof(*array))
 
 extern char * reserved_words_table[];
-extern char * operators_table[];
+extern char * special_characters_table[];
 extern List * identifiers_table;
 
 int search_reserved_words_table(char * data);

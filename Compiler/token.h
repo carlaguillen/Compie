@@ -15,7 +15,7 @@
 
 #define TTYPE_RESERVED_WORD 0x01
 #define TTYPE_IDENTIFIER 0x01 << 1
-#define TTYPE_OPERATOR 0x01 << 2
+#define TTYPE_SPECIAL_CHARACTER 0x01 << 2
 #define TTYPE_NUM 0x01 << 3
 #define TTYPE_STRING 0x01 << 4
 #define TTYPE_COMMENT 0x01 << 5
