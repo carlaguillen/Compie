@@ -14,7 +14,7 @@ int type_for_state(int state) {
 			return TTYPE_COMMENT;
 		case 8:
 			return TTYPE_INVALID;
-		case 9:
+		case 6:
 			return TTYPE_SPECIAL_CHARACTER;
 		default:
 			return -1;
@@ -69,8 +69,8 @@ void init_transition_table() {
 	transition_table[7][invalid_char] = 7;
 	transition_table[7][linebreak] = 1;
 
-	transition_table[1][equal] = 9;
-	transition_table[9][equal] = 1;
+	transition_table[1][equal] = 6;
+	transition_table[6][equal] = 1;
 
 	transition_table[1][quote] = 5;
     transition_table[5][letter] = 5;
