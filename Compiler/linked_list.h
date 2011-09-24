@@ -20,20 +20,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define INDEX_NOT_FOUND -1
+
 typedef struct node {
-  int data;
+  char * data;
   struct node * next;
-  struct node * prev;
 } Node;
 
 typedef struct list {
   Node * head;
 } List;
 
-List * emptylist();
-void add(int data, List * list);
-void delete(int data, List * list);
-void display(List * list);
-void destroy(List * list);
+List * empty_list();
+int add_list(char * data, List * list);
+int search_list(char * data, List *list);
+void delete_list(char * data, List * list);
+void display_list(List * list);
+void destroy_list(List * list);
 
 #endif /* LINKED_LIST_H_ */

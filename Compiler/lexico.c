@@ -12,25 +12,28 @@
 
 #include "lexico.h"
 
-void get_next_token() {
-	transducer_get_next_token();
-	complete_token();
-}
+/***********************************************************/
+/* 						PRIVATE							   */
+/***********************************************************/
 
 void complete_token() {
-	if (token->type == TTYPE_IDENT_OR_RESERV) {
-		int index_of_reserved = id_of_reserved(token.lexeme);
-		if (index_of_reserved != -1) {
-			token->type = TTYPE_RESERV;
+	if(token->type == TTYPE_IDENT_OR_RESERV) {
+		int index_of_reserved = search_reserved_words_table(token->lexeme);
+		if (index_of_reserved != INDEX_NOT_FOUND) {
+			token->type = TTYPE_RESERVED_WORD;
 			token->value = index_of_reserved;
 		} else {
 			token->type = TTYPE_IDENTIFIER;
-			token->value = get_or_insert_identifier(token.lexeme);
+			token->value = add_if_new_indetifiers_table(token->lexeme);
 		}
 	}
-	else {
-		//todo:
-		//token.index_on_table = ...
-	}
+}
 
+/***********************************************************/
+/* 						PUBLIC							   */
+/***********************************************************/
+
+void get_next_token() {
+	transducer_get_next_token();
+	complete_token();
 }

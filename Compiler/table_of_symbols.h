@@ -1,12 +1,33 @@
-// table of identifiers
+/* =======================================================
+ *	 		PCS 2056 - Linguagens e Compiladores
+ * =======================================================
+ *
+ * table_of_symbols.h - Symbol table
+ *
+ * Created on: 21/09/2011
+ * 		Authors:
+ *     		Bruno Pezzolo dos Santos, 5948816
+ *      	Carla Guillen Gomes, 5691366
+ *
+ */
 
-// table of reserved words 
+#ifndef TABLE_OF_SYMBOLS_H_
+#define TABLE_OF_SYMBOLS_H_
 
-// table of special characters 
+#include "linked_list.h"
 
-// implementar lista ligada
+#define lenght(array) (sizeof(array)/sizeof(*array))
 
-// funcoes de inserir / buscar nas tabelas
+extern char * reserved_words_table[];
+extern char * operators_table[];
+extern List * identifiers_table;
 
+int search_reserved_words_table(char * data);
+int search_special_characters_table(char * data);
 
-// BRUNO
+int search_identifiers_table(char * data);
+int add_identifiers_table(char * data);
+int add_if_new_indetifiers_table(char * data);
+void display_identifiers_table();
+
+#endif /* TABLE_OF_SYMBOLS_H_ */

@@ -15,6 +15,7 @@
 
 #include <stdio.h>
 #include "transducer.h"
+#include "table_of_symbols.h"
 
 void get_next_token();
 

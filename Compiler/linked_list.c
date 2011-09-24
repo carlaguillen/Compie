@@ -15,35 +15,37 @@
  */
 
 #include "linked_list.h"
+#include "string.h"
 
-Node * createnode(int data);
+Node * createnode(char * data);
 
-Node * createnode(int data){
+Node * createnode(char * data){
   Node * newNode = malloc(sizeof(Node));
   newNode->data = data;
   newNode->next = NULL;
   return newNode;
 }
 
-List * emptylist(){
+List * empty_list(){
   List * list = malloc(sizeof(List));
   list->head = NULL;
   return list;
 }
 
-void display(List * list) {
+void display_list(List * list) {
   Node * current = list->head;
   if(list->head == NULL)
     return;
   while(current->next != NULL){
-    printf("%d,", current->data);
+    printf("%s,", current->data);
     current = current->next;
   }
-  printf("%d\n", current->data);
+  printf("%s\n", current->data);
 }
 
-void add(int data, List * list){
+int add_list(char * data, List * list){
   Node * current = NULL;
+  int index = 0;
   if(list->head == NULL){
     list->head = createnode(data);
   }
@@ -51,12 +53,25 @@ void add(int data, List * list){
     current = list->head;
     while (current->next != NULL){
       current = current->next;
+      index++;
     }
     current->next = createnode(data);
   }
+  return index;
 }
 
-void delete(int data, List * list){
+int search_list(char * data, List *list) {
+	int index = 0;
+	Node * current = list->head;
+	while (current != NULL) {
+		if(strcmp(current->data, data) == 0) return index;
+		current = current->next;
+		index++;
+	}
+	return INDEX_NOT_FOUND;
+}
+
+void delete_list(char * data, List * list){
   Node * current = list->head;
   Node * previous = current;
   while(current != NULL){
@@ -72,7 +87,7 @@ void delete(int data, List * list){
   }
 }
 
-void destroy(List * list){
+void destroy_list(List * list){
   Node * current = list->head;
   Node * next = current;
   while(current != NULL){

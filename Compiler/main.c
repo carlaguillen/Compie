@@ -1,8 +1,8 @@
 /* =======================================================
  *	 		PCS 2056 - Linguagens e Compiladores
  * =======================================================
- * Este programa consiste na 1Âª parte do projeto da disci-
- * plina PCS2056, a construÃ§Ã£o de um analisador lÃ©xico.
+ * Este programa consiste na 1ª parte do projeto da disci-
+ * plina PCS2056, a construção de um analisador léxico.
  *
  * Criado em: 15/09/2011
  * 		Autores:
@@ -25,6 +25,6 @@ int main(int argc, char **argv) {
 		imprime_token(token);
 	} while (token.type != END_0F_FILE)
 
-	print_table_identifiers();
+	display_identifiers_table();
 	return 0;
 }
