@@ -11,7 +11,6 @@
  */
 
 #include "lexico.h"
-#include "transducer.h"
 
 void get_next_token() {
 	transducer_get_next_token();

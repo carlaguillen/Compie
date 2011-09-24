@@ -14,9 +14,8 @@
 #define LEXICO_H_
 
 #include <stdio.h>
-#include "token.h"
+#include "transducer.h"
+
+void get_next_token();
 
 #endif /* LEXICO_H_ */
-
-
-//BRUNO
