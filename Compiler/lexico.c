@@ -11,10 +11,20 @@
  */
 
 #include "lexico.h"
+#include "string.h"
 
 /***********************************************************/
 /* 						PRIVATE							   */
 /***********************************************************/
+
+char *substring(char *from, size_t begin, size_t len) {
+	if(from == 0 || strlen(from) == 0 || strlen(from) < begin || strlen(from) < (begin+len)) return 0;
+
+	char *substring = (char *)malloc(len);
+	strncpy(substring, from+begin, len);
+	substring[len+1] = '\0';
+	return substring;
+}
 
 void complete_token() {
 	switch(token->type) {
@@ -35,6 +45,9 @@ void complete_token() {
 		break;
 	case TTYPE_NUM:
 		token->value = atoi(token->lexeme);
+		break;
+	case TTYPE_STRING:
+		token->lexeme = substring(token->lexeme, 1, strlen(token->lexeme)-2);
 		break;
 	default:
 		// Other types do not have token->value

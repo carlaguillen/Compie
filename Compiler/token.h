@@ -13,6 +13,8 @@
 #ifndef TOKEN_H_
 #define TOKEN_H_
 
+#include <stdlib.h>
+
 #define TTYPE_RESERVED_WORD 0x01
 #define TTYPE_IDENTIFIER 0x01 << 1
 #define TTYPE_SPECIAL_CHARACTER 0x01 << 2
@@ -33,5 +35,9 @@ typedef struct {
 extern Token *token; // global
 
 void print_token();
+void init_token();
+void release_token();
+void set_lexeme(char *lexeme);
+
 
 #endif /* TOKEN_H_ */

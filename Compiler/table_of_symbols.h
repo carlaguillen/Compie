@@ -23,7 +23,7 @@ extern char * special_characters_table[];
 extern List * identifiers_table;
 
 int search_reserved_words_table(char * data);
-int search_operators_table(char * data);
+int search_special_characters_table(char * data);
 
 int search_identifiers_table(char * data);
 int add_identifiers_table(char * data);
