@@ -54,5 +54,5 @@ char * string_for_type_token(int type) {
 }
 
 void print_token() {
-	printf("%s\t\t%d\t%s\n", string_for_type_token(token->type), token->value, token->lexeme);
+	printf("%s\t%s (%d)\n", token->lexeme, string_for_type_token(token->type), token->value);
 } 

@@ -18,9 +18,10 @@
 /***********************************************************/
 
 char *substring(char *from, size_t begin, size_t len) {
+	char *substring;
 	if(from == 0 || strlen(from) == 0 || strlen(from) < begin || strlen(from) < (begin+len)) return 0;
 
-	char *substring = (char *)malloc(len);
+	substring = (char *)malloc(len);
 	strncpy(substring, from+begin, len);
 	substring[len+1] = '\0';
 	return substring;

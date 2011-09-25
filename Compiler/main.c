@@ -27,6 +27,9 @@ int main(int argc, char **argv) {
 		print_token();
 	} while (token->type != TTYPE_END_OF_FILE);
 
+	display_reserved_words_table();
+	display_special_characters_table();
 	display_identifiers_table();
 	return 0;
+
 }

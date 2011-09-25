@@ -33,14 +33,16 @@ List * empty_list(){
 }
 
 void display_list(List * list) {
+  int i = 0;
   Node * current = list->head;
   if(list->head == NULL)
     return;
   while(current->next != NULL){
-    printf("%s,", current->data);
+    printf("%d\t|\t%s\n", i, current->data);
     current = current->next;
+	i++;
   }
-  printf("%s\n", current->data);
+  printf("%d\t|\t%s\n", i, current->data);
 }
 
 int add_list(char * data, List * list){

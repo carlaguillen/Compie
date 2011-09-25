@@ -32,8 +32,8 @@ int search_table(char * data, char * table[]) {
 /* 						PUBLIC							   */
 /***********************************************************/
 
-char * reserved_words_table[15] = { "void", "boolean", "int", "string", "main", "def", "if", "else", "while", "return", "true", "false", "and", "or", "not" };
-char * special_characters_table[14] = { "+", "-", "*", "/", ">", "<", "==", "=", "(", ")", "\"", "{", "}", ";" };
+char * reserved_words_table[LEN_OF_RESERVED_TABLE] = { "void", "boolean", "int", "string", "main", "def", "if", "else", "while", "return", "true", "false", "and", "or", "not" };
+char * special_characters_table[LEN_OF_SPECIAL_CHAR_TABLE] = { "+", "-", "*", "/", ">", "<", "==", "=", "(", ")", "\"", "{", "}", ";" };
 List * identifiers_table = NULL;
 
 int search_reserved_words_table(char * data) {
@@ -67,5 +67,22 @@ int add_if_new_indetifiers_table(char * data) {
 }
 
 void display_identifiers_table() {
+	printf("\n--------------- Identifiers table ------------------ \n");
 	display_list(identifiers_table);
 }
+
+void display_reserved_words_table() {
+	int i;
+	printf("\n--------------- Reserved words table --------------- \n");
+	for (i = 0; i < LEN_OF_RESERVED_TABLE; i++) {
+		printf("%d\t|\t%s\n", i, reserved_words_table[i]);
+	}
+}
+
+void display_special_characters_table() {
+	int i;
+	printf("\n--------------- Special characters table --------------- \n");
+	for (i = 0; i < LEN_OF_SPECIAL_CHAR_TABLE; i++) {
+		printf("%d\t|\t%s\n", i, reserved_words_table[i]);
+	}
+} 

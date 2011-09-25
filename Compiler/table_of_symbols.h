@@ -16,6 +16,9 @@
 
 #include "linked_list.h"
 
+#define LEN_OF_RESERVED_TABLE 15
+#define LEN_OF_SPECIAL_CHAR_TABLE 14
+
 #define lenght(array) (sizeof(array)/sizeof(*array))
 
 extern char * reserved_words_table[];
@@ -29,5 +32,7 @@ int search_identifiers_table(char * data);
 int add_identifiers_table(char * data);
 int add_if_new_indetifiers_table(char * data);
 void display_identifiers_table();
+void display_reserved_words_table();
+void display_special_characters_table();
 
 #endif /* TABLE_OF_SYMBOLS_H_ */
