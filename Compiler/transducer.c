@@ -1,3 +1,14 @@
+/* =======================================================
+ *	 		PCS 2056 - Linguagens e Compiladores
+ * =======================================================
+ *
+ *
+ * Criado on: 15/09/2011
+ * 		Authors:
+ *     		Bruno Pezzolo dos Santos, 5948816
+ *      	Carla Guillen Gomes, 5691366
+ */
+
 #include "transducer.h"
 
 int type_for_state(int state) {
@@ -10,12 +21,14 @@ int type_for_state(int state) {
 			return TTYPE_NUM;
 		case 5:
 			return TTYPE_STRING;
+		case 6:
+			return TTYPE_SPECIAL_CHARACTER;
 		case 7:
 			return TTYPE_COMMENT;
 		case 8:
 			return TTYPE_INVALID;
-		case 6:
-			return TTYPE_SPECIAL_CHARACTER;
+		case 9:
+			return TTYPE_END_OF_FILE;
 		default:
 			return -1;
 	}
@@ -41,23 +54,28 @@ type_char get_type_char(char c) {
 			 c == ';' || c == '<' || c == '>' || c == '(' || 
 			 c == ')' || c == '“' || c == '{' || c == '}')
 		return special;
+	else if (c == EOF) 
+		return eof;
 	else
 		return invalid_char;
 }
 
 void init_transition_table() {
 
+	// TTYPE_IDENT_OR_RESERV
 	transition_table[1][letter] = 2;
 	transition_table[2][letter] = 2;
 	transition_table[2][digit] = 2;
-	transition_table[2][space] = 1;
 
+	// TTYPE_NUM
 	transition_table[1][digit] = 4;
 	transition_table[4][digit] = 4;
-	transition_table[4][space] = 1;
 
+	// space, \t and \n
 	transition_table[1][space] = 1;
-	
+	transition_table[1][linebreak] = 1;
+
+	// TTYPE_COMMENT
 	transition_table[1][sharp] = 7;
 	transition_table[7][letter] = 7;
 	transition_table[7][digit] = 7;
@@ -69,9 +87,13 @@ void init_transition_table() {
 	transition_table[7][invalid_char] = 7;
 	transition_table[7][linebreak] = 1;
 
+	// TTYPE_SPECIAL_CHARACTER
+	transition_table[1][special] = 3;
+	// TTYPE_SPECIAL_CHARACTER (==)
 	transition_table[1][equal] = 6;
 	transition_table[6][equal] = 1;
 
+	// TTYPE_STRING
 	transition_table[1][quote] = 5;
     transition_table[5][letter] = 5;
     transition_table[5][digit] = 5;
@@ -83,47 +105,57 @@ void init_transition_table() {
 	transition_table[5][invalid_char] = 5;
     transition_table[5][quote] = 1;
 
-	transition_table[1][linebreak] = 1;
-
-	transition_table[1][special] = 3;
-	transition_table[3][space] = 1;
-
+	// TTYPE_INVALID
 	transition_table[1][invalid_char] = 8;
-	transition_table[8][space] = 1;
+
+	// TTYPE_END_OF_FILE
+	transition_table[1][eof] = 9;
 }
 
 void transducer_get_next_token() {
-	int state = 1;
-	char *current_char = get_next_char();
-	int type_char = get_type_char(*current_char);
+	char current_char = get_next_char();
+	int type_char = get_type_char(current_char);
 
-	int next_state = transition_table[state][*current_char];
-	while(next_state == 1) { //ignoring spaces, \n and \t
+	int next_state = transition_table[1][type_char];
+	int token_type;
+	char look_ahead_char; 
+	int type_look_ahead;
+	List * lexeme;
+	
+	//eof?
+	if (next_state == 9) { 
+		token_type = TTYPE_END_OF_FILE;
+	}
+	//ignoring spaces, \n and \t
+	while(next_state == 1) { 
 		current_char = get_next_char();
-		type_char = get_type_char(*current_char);
-		next_state = transition_table[state][type_char];
+		type_char = get_type_char(current_char);
+		next_state = transition_table[next_state][type_char];
 	}
 	
-	char *look_ahead_char = get_look_ahead();
-	int type_look_ahead = get_type_char(*look_ahead_char);
-	char lexeme[] = *current_char;
+	look_ahead_char = get_look_ahead();
+	type_look_ahead = get_type_char(look_ahead_char);
+	lexeme = empty_list();
+	alloc_add_list(current_char, lexeme);
 
-	int token_type;
+	// while token is incomplete -- using the lookahead, next state isn't invalid (0)
+	while(transition_table[next_state][type_look_ahead] != 0) { 
+		current_char = get_next_char();
+		type_char = get_type_char(current_char);
+		look_ahead_char = get_look_ahead();
+		type_look_ahead = get_type_char(look_ahead_char);
+		alloc_add_list(current_char, lexeme);
+		if(transition_table[next_state][type_char] == 1) {
+			// token is complete now
+			break;
+		}
+		next_state = transition_table[next_state][type_char];
 
-	while(transition_table[next_state][type_look_ahead] != 1 &&
-		  transition_table[next_state][type_look_ahead] != 0) {
-			current_char = get_next_char();
-			type_char = get_type_char(*current_char);
-			look_ahead_char = get_look_ahead();
-			type_look_ahead = get_type_char(*look_ahead_char);
-			strcat (lexeme, current_char);
-			next_state = transition_table[state][type_char];
 	}
 	token_type = type_for_state(next_state);
-	
+	alloc_add_list('\0', lexeme);
+	// fill type and lexeme of global variable (the value will be filled by lexico.c)
 	token->type = token_type;
-	token->lexeme = lexeme;
-
-	//OBS: ACHO QUE PRECISA DE UMA TABELA DE TRANSIÇÕES (ESTADO_ATUAL, CHAR)->PROX_ESTADO
+	token->lexeme = get_string_array(lexeme);
 }
 

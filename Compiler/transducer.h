@@ -2,7 +2,6 @@
  *	 		PCS 2056 - Linguagens e Compiladores
  * =======================================================
  *
- * Analisador léxico
  *
  * Criado em: 15/09/2011
  * 		Autores:
@@ -16,9 +15,11 @@
 #include "token.h"
 #include <stdlib.h>
 #include <string.h>
+#include "file_reader.h"
+#include "linked_list.h" 
 
-#define NUM_STATES 8
-#define NUM_TYPE_CHARS 7
+#define NUM_STATES 9
+#define NUM_TYPE_CHARS 10
 
 typedef enum {
 	letter,
@@ -29,10 +30,12 @@ typedef enum {
 	quote,
 	linebreak,
 	special,
+	eof,
 	invalid_char
 } type_char;
 
 int transition_table[NUM_STATES][NUM_TYPE_CHARS];
+void transducer_get_next_token();
 
 #endif /* TRANSDUCER_H_ */
 

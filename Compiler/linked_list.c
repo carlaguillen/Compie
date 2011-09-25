@@ -98,3 +98,27 @@ void destroy_list(List * list){
   }
   free(list);
 }
+
+char * get_string_array(List * list) {
+	int size = 0;
+	Node * node;
+	char * string;
+	int i;
+
+	for(node = list->head; node != NULL; node = node->next) {
+		size ++;
+	}
+	string = (char *)malloc(size*sizeof(char));
+	i = 0;
+	for(node = list->head; node != NULL; node = node->next) {
+		string[i] = *(node->data);
+		i++;
+	}
+	return string;
+} 
+
+int alloc_add_list(char data, List * list) {
+	char * ptr = (char *)malloc(sizeof(char));
+	*ptr = data;
+	add_list(ptr, list);
+}

@@ -20,6 +20,7 @@
 #define TTYPE_STRING 0x01 << 4
 #define TTYPE_COMMENT 0x01 << 5
 #define TTYPE_INVALID 0x01 << 6
+#define TTYPE_END_OF_FILE 0x01 << 7
 
 #define TTYPE_IDENT_OR_RESERV (TTYPE_RESERVED_WORD | TTYPE_IDENTIFIER)
 
@@ -30,5 +31,7 @@ typedef struct {
 } Token;
 
 extern Token *token; // global
+
+void print_token();
 
 #endif /* TOKEN_H_ */

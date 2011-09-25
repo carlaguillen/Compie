@@ -1,8 +1,8 @@
 /* =======================================================
  *	 		PCS 2056 - Linguagens e Compiladores
  * =======================================================
- * Este programa consiste na 1ª parte do projeto da disci-
- * plina PCS2056, a construção de um analisador léxico.
+ * Este programa consiste na 1ï¿½ parte do projeto da disci-
+ * plina PCS2056, a construï¿½ï¿½o de um analisador lï¿½xico.
  *
  * Criado em: 15/09/2011
  * 		Autores:
@@ -14,16 +14,18 @@
 #include <stdio.h>
 #include "lexico.h"
 #include "file_reader.h"
+#include "table_of_symbols.h"
 
 int main(int argc, char **argv) {
 
-	// init file_reader
-	init_file_reader(&path);
+	init_file_reader("..\\..\\..\\entrada_teste.txt");
+	init_token();
+	init_transition_table();
 
 	do {
-		get_next_token(); // funÃ§Ã£o do analisador lexico
-		imprime_token(token);
-	} while (token.type != END_0F_FILE)
+		get_next_token(); // lexical analyser
+		print_token();
+	} while (token->type != TTYPE_END_OF_FILE);
 
 	display_identifiers_table();
 	return 0;
