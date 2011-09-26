@@ -67,13 +67,13 @@ int add_if_new_indetifiers_table(char * data) {
 }
 
 void display_identifiers_table() {
-	printf("\n--------------- Identifiers table ------------------ \n");
+	printf("\nIdentifiers table\n\n");
 	display_list(identifiers_table);
 }
 
 void display_reserved_words_table() {
 	int i;
-	printf("\n--------------- Reserved words table --------------- \n");
+	printf("\nReserved words table \n\n");
 	for (i = 0; i < LEN_OF_RESERVED_TABLE; i++) {
 		printf("%d\t|\t%s\n", i, reserved_words_table[i]);
 	}
@@ -81,8 +81,8 @@ void display_reserved_words_table() {
 
 void display_special_characters_table() {
 	int i;
-	printf("\n--------------- Special characters table --------------- \n");
+	printf("\nSpecial characters table\n\n");
 	for (i = 0; i < LEN_OF_SPECIAL_CHAR_TABLE; i++) {
-		printf("%d\t|\t%s\n", i, reserved_words_table[i]);
+		printf("%d\t|\t%s\n", i, special_characters_table[i]);
 	}
 } 
