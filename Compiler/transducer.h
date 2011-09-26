@@ -42,7 +42,3 @@ void transducer_get_next_token();
 #endif /* TRANSDUCER_H_ */
 
 
-//CARLA
-
-
-

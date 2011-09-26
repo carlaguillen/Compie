@@ -15,7 +15,7 @@
 FILE *file;
 
 void init_file_reader(char *path) {
-	// open file
+	/* open file */
 	file = fopen(path, "r");
 	if (file == NULL) {
 		printf("Error: could not open file %s", path);

@@ -29,10 +29,10 @@
 typedef struct {
 	int type;
 	char *lexeme;
-	int value; // index_on_table for TTYPE_IDENTIFIER, TTYPE_OPERATOR, TTYPE_RESERVED_WORD or value for TTYPE_NUMBER / not used when TTYPE_STRING
+	int value; /* index_on_table for TTYPE_IDENTIFIER, TTYPE_OPERATOR, TTYPE_RESERVED_WORD or value for TTYPE_NUMBER / not used when TTYPE_STRING */
 } Token;
 
-extern Token *token; // global
+extern Token *token; /* global */
 
 void print_token();
 void init_token();

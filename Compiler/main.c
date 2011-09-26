@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
 	init_transition_table();
 
 	do {
-		get_next_token(); // lexical analyser
+		get_next_token(); /* lexical analyser */
 		print_token();
 	} while (token->type != TTYPE_END_OF_FILE);
 

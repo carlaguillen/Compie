@@ -17,10 +17,10 @@
 /* 						PRIVATE							   */
 /***********************************************************/
 
-// This functions is not used because when asked for length(table)
-// It always returns 1, even though you can run trough all of table's
-// elements.
-// It's probably something with argument passing, didn't find out
+/* This functions is not used because when asked for length(table)
+ It always returns 1, even though you can run trough all of table's
+ elements.
+ It's probably something with argument passing, didn't find out */
 int search_table(char * data, char * table[]) {
 	int i;
 	for(i = 0; i < lenght(table); i++)

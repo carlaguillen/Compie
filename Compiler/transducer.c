@@ -63,20 +63,20 @@ type_char get_type_char(char c) {
 
 void init_transition_table() {
 
-	// TTYPE_IDENT_OR_RESERV
+	/* TTYPE_IDENT_OR_RESERV */
 	transition_table[1][letter] = 2;
 	transition_table[2][letter] = 2;
 	transition_table[2][digit] = 2;
 
-	// TTYPE_NUM
+	/* TTYPE_NUM */
 	transition_table[1][digit] = 4;
 	transition_table[4][digit] = 4;
 
-	// space, \t and \n
+	/* space, \t and \n */
 	transition_table[1][space] = 1;
 	transition_table[1][linebreak] = 1;
 
-	// TTYPE_COMMENT
+	/* TTYPE_COMMENT */
 	transition_table[1][sharp] = 7;
 	transition_table[7][letter] = 7;
 	transition_table[7][digit] = 7;
@@ -88,13 +88,13 @@ void init_transition_table() {
 	transition_table[7][invalid_char] = 7;
 	transition_table[7][linebreak] = 1;
 
-	// TTYPE_SPECIAL_CHARACTER
+	/* TTYPE_SPECIAL_CHARACTER */
 	transition_table[1][special] = 3;
-	// TTYPE_SPECIAL_CHARACTER (==)
+	/* TTYPE_SPECIAL_CHARACTER (==) */
 	transition_table[1][equal] = 6;
 	transition_table[6][equal] = 1;
 
-	// TTYPE_STRING
+	/* TTYPE_STRING */
 	transition_table[1][quote] = 5;
     transition_table[5][letter] = 5;
     transition_table[5][digit] = 5;
@@ -106,10 +106,10 @@ void init_transition_table() {
 	transition_table[5][invalid_char] = 5;
     transition_table[5][quote] = 1;
 
-	// TTYPE_INVALID
+	/* TTYPE_INVALID */
 	transition_table[1][invalid_char] = 8;
 
-	// TTYPE_END_OF_FILE
+	/* TTYPE_END_OF_FILE */
 	transition_table[1][eof] = 9;
 }
 
@@ -123,11 +123,11 @@ void transducer_get_next_token() {
 	int type_look_ahead;
 	List * lexeme;
 	
-	//eof?
+	/*eof?*/
 	if (next_state == 9) { 
 		token_type = TTYPE_END_OF_FILE;
 	}
-	//ignoring spaces, \n and \t
+	/* ignoring spaces, \n and \t */
 	while(next_state == 1) { 
 		current_char = get_next_char();
 		type_char = get_type_char(current_char);
@@ -139,7 +139,7 @@ void transducer_get_next_token() {
 	lexeme = empty_list();
 	alloc_add_list(current_char, lexeme);
 
-	// while token is incomplete -- using the lookahead, next state isn't invalid (0)
+	/* while token is incomplete -- using the lookahead, next state isn't invalid (0) */
 	while(transition_table[next_state][type_look_ahead] != 0) { 
 		current_char = get_next_char();
 		type_char = get_type_char(current_char);
@@ -147,7 +147,7 @@ void transducer_get_next_token() {
 		type_look_ahead = get_type_char(look_ahead_char);
 		alloc_add_list(current_char, lexeme);
 		if(transition_table[next_state][type_char] == 1) {
-			// token is complete now
+			/* token is complete now */
 			break;
 		}
 		next_state = transition_table[next_state][type_char];
@@ -155,7 +155,7 @@ void transducer_get_next_token() {
 	}
 	token_type = type_for_state(next_state);
 	alloc_add_list('\0', lexeme);
-	// fill type and lexeme of global variable (the value will be filled by lexico.c)
+	/* fill type and lexeme of global variable (the value will be filled by lexico.c) */
 	token->type = token_type;
 	token->lexeme = get_string_array(lexeme);
 }

@@ -18,7 +18,3 @@ char get_look_ahead();
 void init_file_reader(char *path);
 
 #endif /* FILE_READER_H_ */
-
-
-
-//CARLA

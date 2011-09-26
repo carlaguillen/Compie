@@ -51,7 +51,7 @@ void complete_token() {
 		token->lexeme = substring(token->lexeme, 1, strlen(token->lexeme)-2);
 		break;
 	default:
-		// Other types do not have token->value
+		/* Other types do not have token->value */
 		break;
 	}
 }
