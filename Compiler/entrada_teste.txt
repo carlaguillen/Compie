@@ -1,6 +1,6 @@
 int a = 1;
 int b=2;
-string s = "ol·!?"; # coment·rio qualquer
+string s = "ol√°!?"; # coment√°rio qualquer
 int a = 2,2; 
 123
 #

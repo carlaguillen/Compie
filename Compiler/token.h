@@ -4,8 +4,8 @@
  *
  * token.h - Token
  *
- * Criado em: 21/09/2011
- * 		Autores:
+ * Created on: 21/09/2011
+ * 		Authors:
  *     		Bruno Pezzolo dos Santos, 5948816
  *      	Carla Guillen Gomes, 5691366
  */

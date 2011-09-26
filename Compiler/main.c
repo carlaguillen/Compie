@@ -1,11 +1,11 @@
 /* =======================================================
  *	 		PCS 2056 - Linguagens e Compiladores
  * =======================================================
- * Este programa consiste na 1� parte do projeto da disci-
- * plina PCS2056, a constru��o de um analisador l�xico.
+ * This program consist on the 1st stage of the PCS2056
+ * course's compiler. The implementation of a lexical analyser.
  *
- * Criado em: 15/09/2011
- * 		Autores:
+ * Created on: 15/09/2011
+ * 		Authors:
  *     		Bruno Pezzolo dos Santos, 5948816
  *      	Carla Guillen Gomes, 5691366
  */
@@ -18,7 +18,7 @@
 
 int main(int argc, char **argv) {
 
-	init_file_reader("..\\..\\..\\entrada_teste.txt");
+	init_file_reader("entrada_teste.txt");
 	init_token();
 	init_transition_table();
 

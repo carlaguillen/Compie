@@ -2,9 +2,10 @@
  *	 		PCS 2056 - Linguagens e Compiladores
  * =======================================================
  *
+ *	transducer.h - Transducer
  *
- * Criado em: 15/09/2011
- * 		Autores:
+ * Created on: 15/09/2011
+ * 		Authors:
  *     		Bruno Pezzolo dos Santos, 5948816
  *      	Carla Guillen Gomes, 5691366
  */
@@ -35,6 +36,7 @@ typedef enum {
 } type_char;
 
 int transition_table[NUM_STATES][NUM_TYPE_CHARS];
+void init_transition_table();
 void transducer_get_next_token();
 
 #endif /* TRANSDUCER_H_ */

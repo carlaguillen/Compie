@@ -2,8 +2,9 @@
  *	 		PCS 2056 - Linguagens e Compiladores
  * =======================================================
  *
+ * transducer.c - Transducer
  *
- * Criado on: 15/09/2011
+ * Created on: 15/09/2011
  * 		Authors:
  *     		Bruno Pezzolo dos Santos, 5948816
  *      	Carla Guillen Gomes, 5691366
