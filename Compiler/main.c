@@ -18,7 +18,7 @@
 
 int main(int argc, char **argv) {
 
-	init_file_reader("entrada_teste.txt");
+	init_file_reader("..\\..\\..\\entrada_teste.txt");
 	init_token();
 	init_transition_table();
 
