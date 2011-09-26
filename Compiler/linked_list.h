@@ -38,6 +38,6 @@ void delete_list(char * data, List * list);
 void display_list(List * list);
 void destroy_list(List * list);
 char * get_string_array(List * list);
-int alloc_add_list(char data, List * list);
+void alloc_add_list(char data, List * list);
 
 #endif /* LINKED_LIST_H_ */

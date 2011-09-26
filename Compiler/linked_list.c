@@ -119,7 +119,7 @@ char * get_string_array(List * list) {
 	return string;
 } 
 
-int alloc_add_list(char data, List * list) {
+void alloc_add_list(char data, List * list) {
 	char * ptr = (char *)malloc(sizeof(char));
 	*ptr = data;
 	add_list(ptr, list);
