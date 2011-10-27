@@ -1,0 +1,13 @@
+programa = "program" { "typedef" "struct" identificador "{" { "declare" ( ( "int" | "boolean" ) identificador [ "[" numero "]" ] {"," ( "int" | "boolean" ) identificador [ "[" numero "]" ] } | "struct" identificador identificador {"," "struct" identificador identificador } ) ";" } "}" } { "declare" ( ( "int" | "boolean" ) identificador [ "[" numero "]" ] {"," ( "int" | "boolean" ) identificador [ "[" numero "]" ] } | "struct" identificador identificador {"," "struct" identificador identificador } ) ";" } { "function" ( "int" | "boolean" ) identificador "(" [ ( "int" | "boolean" ) identificador [ "[" numero "]" ] {"," ( "int" | "boolean" ) identificador [ "[" numero "]" ] } ] ")" "{" { "declare" ( ( "int" | "boolean" ) identificador [ "[" numero "]" ] {"," ( "int" | "boolean" ) identificador [ "[" numero "]" ] } | "struct" identificador identificador {"," "struct" identificador identificador } ) ";" } {comando} "}" } "main" "{" { "declare" ( ( "int" | "boolean" ) identificador [ "[" numero "]" ] {"," ( "int" | "boolean" ) identificador [ "[" numero "]" ] } | "struct" identificador identificador {"," "struct" identificador identificador } ) ";"} {comando} "}" .
+
+comando = identificador ( "=" ( expressao | "{" expressao{"," expressao} "}" ) | "[" numero "]" "=" expressao | "(" [ expressao {"," expressao} ] ")" ) ";" | "if" "(" expressao ")" "{" {comando} "}" ["else" "{" {comando}"}"] | "while" "(" expressao ")" "{" {comando}"}" | "input" identificador ";" | "output" identificador ";"  | "return" expressao ";" .
+
+expressao = "true" | "false" | "not" expressao_logica | numero | expressao ( ">" | "<" | "==" | "and" | "or" | "+" | "-" | "*" | "/" ) expressao | identificador [ "[" numero "]" | "." identificador | "(" [ expressao {"," expressao} ] ")" ] .
+
+identificador = letra{letra|digito} .
+
+letra = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "_".
+
+digito = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" .
+
+numero = digito{digito} .
