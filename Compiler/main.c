@@ -31,6 +31,7 @@ int main(int argc, char **argv) {
 	display_special_characters_table();
 	display_identifiers_table();
 
+	while(1);
 	return 0;
 
 }

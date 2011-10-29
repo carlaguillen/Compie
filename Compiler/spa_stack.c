@@ -13,6 +13,10 @@
 
 #include "spa_stack.h"
 
+/***********************************************************/
+/* 						PRIVATE							   */
+/***********************************************************/
+
 SpaNode * create_spa_node(int state) {
 	SpaNode * newNode = malloc(sizeof(SpaNode));
 
@@ -25,6 +29,10 @@ SpaNode * create_spa_node(int state) {
 	newNode->next = NULL;
 	return newNode;
 }
+
+/***********************************************************/
+/* 						PUBLIC							   */
+/***********************************************************/
 
 SpaStack * empty_spa_stack() {
 	SpaStack * emptyStack = malloc(sizeof(SpaStack));
