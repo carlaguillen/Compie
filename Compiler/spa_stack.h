@@ -16,8 +16,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "machines.h"
 
 typedef struct spaNode {
+	int machine_id;
 	int state;
 	struct spaNode * next;
 } SpaNode;
@@ -27,8 +29,8 @@ typedef struct spaStack {
 } SpaStack;
 
 SpaStack * empty_spa_stack();
-void push_state_spa_stack(int state, SpaStack * stack);
-int pop_spa_stack(SpaStack * stack);
+void spa_stack_push(Machine machine, SpaStack * stack);
+Machine spa_stack_pop(SpaStack * stack);
 int spa_stack_is_empty(SpaStack *stack);
 
 #endif /* STACK_H_ */

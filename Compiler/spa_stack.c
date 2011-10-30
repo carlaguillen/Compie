@@ -17,7 +17,7 @@
 /* 						PRIVATE							   */
 /***********************************************************/
 
-SpaNode * create_spa_node(int state) {
+SpaNode * create_spa_node(Machine machine) {
 	SpaNode * newNode = malloc(sizeof(SpaNode));
 
 	if(newNode == NULL) {
@@ -25,7 +25,8 @@ SpaNode * create_spa_node(int state) {
 		abort();
 	}
 
-	newNode->state = state;
+	newNode->machine_id = machine.machine_id;
+	newNode->state = machine.current_state;
 	newNode->next = NULL;
 	return newNode;
 }
@@ -40,23 +41,24 @@ SpaStack * empty_spa_stack() {
 	return emptyStack;
 }
 
-void push_state_spa_stack(int state, SpaStack * stack) {
-	SpaNode * node = create_spa_node(state);
+void spa_stack_push(Machine machine, SpaStack * stack) {
+	SpaNode * node = create_spa_node(machine);
 	node->next = stack->head;
 	stack->head = node;
 }
 
-int pop_spa_stack(SpaStack * stack) {
+Machine spa_stack_pop(SpaStack * stack) {
 	if (spa_stack_is_empty(stack)) {
 		fputs("Error: underflow on SpaStack\n", stderr);
 		abort();
 	}
 
 	SpaNode * head = stack->head;
-	int state = head->state;
+	Machine machine = machines_array[head->machine_id];
+	machine.current_state = head->state;
 	stack->head = head->next;
 	free(head);
-	return state;
+	return machine;
 }
 
 int spa_stack_is_empty(SpaStack *stack) {

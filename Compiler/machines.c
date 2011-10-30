@@ -20,6 +20,9 @@
 void init_machine(Machine *machine) {
 	int i, j;
 
+	machine->current_state = MACHINE_INVALID_STATE;
+	machine->machine_id = MTYPE_INVALID;
+
 	for(i = 0; i < MAX_FINAL_STATES; i++)
 		machine->final_state[i] = MACHINE_INVALID_STATE;
 	for(i=0; i < MAX_STATES; i++)
@@ -40,6 +43,7 @@ void init_machines() {
 	// Machine Program: MTYPE_PROGRAM
 	init_machine(&program);
 
+	program.machine_id = MTYPE_PROGRAM;
 	program.current_state = 0;
 
 	program.final_state[0] = 10;
@@ -235,6 +239,7 @@ void init_machines() {
 	// Machine Command: MTYPE_COMMAND
 	init_machine(&command);
 
+	command.machine_id = MTYPE_COMMAND;
 	command.current_state = 0;
 
 	command.final_state[0] = 11;
@@ -305,6 +310,7 @@ void init_machines() {
 	// Machine Expression: MTYPE_EXPRESSION
 	init_machine(&expression);
 
+	expression.machine_id = MTYPE_EXPRESSION;
 	expression.current_state = 0;
 
 	expression.final_state[0] = 1;

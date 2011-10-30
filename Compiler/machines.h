@@ -82,7 +82,8 @@
 #define MTOKEN_TYPES 37
 #define MACHINE_TYPES 3
 
-typedef struct machineProgram {
+typedef struct machine {
+	int machine_id;
 	int current_state;
 	int final_state[MAX_FINAL_STATES];
 	int transition_table[MAX_STATES][MTOKEN_TYPES];

@@ -12,26 +12,32 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "lexico.h"
 #include "file_reader.h"
 #include "table_of_symbols.h"
+#include "spa.h"
 
 int main(int argc, char **argv) {
 
 	init_file_reader("entrada_teste.txt");
 	init_token();
 	init_transition_table();
+	spa_init();
 
 	do {
 		get_next_token(); /* lexical analyser */
 		print_token();
+
+//		if (token->type != TTYPE_COMMENT)
+//			spa_step();
+////			if (!spa_step()) {
+////				printf("Source code would not be correctly parsed;");
+////				break;
+////			}
 	} while (token->type != TTYPE_END_OF_FILE);
 
-	display_reserved_words_table();
-	display_special_characters_table();
-	display_identifiers_table();
+//	display_reserved_words_table();
+//	display_special_characters_table();
+//	display_identifiers_table();
 
-	while(1);
 	return 0;
-
 }
