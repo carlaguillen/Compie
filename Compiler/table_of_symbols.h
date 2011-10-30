@@ -16,8 +16,8 @@
 
 #include "linked_list.h"
 
-#define LEN_OF_RESERVED_TABLE 15
-#define LEN_OF_SPECIAL_CHAR_TABLE 14
+#define LEN_OF_RESERVED_TABLE 22
+#define LEN_OF_SPECIAL_CHAR_TABLE 18
 
 #define lenght(array) (sizeof(array)/sizeof(*array))
 

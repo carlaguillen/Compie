@@ -1,8 +1,22 @@
-int a = 1;
-int b=2;
-string s = "olá!?"; # comentário qualquer
-int a = 2,2; 
-123
-#
-$
-{typedef}
+program 
+
+typedef struct s {
+	declare int a;
+	declare boolean b, boolean c;
+}
+
+declare int t4;
+declare boolean v[9];
+declare struct s s1;
+
+function int func (boolean param1, int param2) {
+	output t4;
+	return t4;
+}
+
+main {
+	declare int a;
+	declare boolean bool;
+	a = func(bool, a);
+	t4 = 1;
+}

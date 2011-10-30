@@ -32,8 +32,8 @@ int search_table(char * data, char * table[]) {
 /* 						PUBLIC							   */
 /***********************************************************/
 
-char * reserved_words_table[LEN_OF_RESERVED_TABLE] = { "void", "boolean", "int", "string", "main", "def", "if", "else", "while", "return", "true", "false", "and", "or", "not" };
-char * special_characters_table[LEN_OF_SPECIAL_CHAR_TABLE] = { "+", "-", "*", "/", ">", "<", "==", "=", "(", ")", "\"", "{", "}", ";" };
+char * reserved_words_table[LEN_OF_RESERVED_TABLE] = { "program", "main", "typedef", "declare", "function", "return", "struct", "int", "boolean", "if", "else", "while", "input", "output", "true", "false", "and", "or", "not", "void","string", "def"};
+char * special_characters_table[LEN_OF_SPECIAL_CHAR_TABLE] = { "{", "}", "[", "]", "(", ")", ";", ",", ".", "=", ">", "<", "==", "+", "-", "*", "/", "\""};
 List * identifiers_table = NULL;
 
 int search_reserved_words_table(char * data) {

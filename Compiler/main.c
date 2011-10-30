@@ -23,17 +23,19 @@ int main(int argc, char **argv) {
 	init_transition_table();
 	spa_init();
 
-	do {
+	get_next_token(); /* lexical analyser */
+	print_token();
+
+	while (token->type != TTYPE_END_OF_FILE) {
+		if (token->type != TTYPE_COMMENT && token->type != TTYPE_STRING)
+//			spa_step();
+			if (!spa_step()) {
+				printf("Source code would not be correctly parsed;");
+				break;
+			}
 		get_next_token(); /* lexical analyser */
 		print_token();
-
-//		if (token->type != TTYPE_COMMENT)
-//			spa_step();
-////			if (!spa_step()) {
-////				printf("Source code would not be correctly parsed;");
-////				break;
-////			}
-	} while (token->type != TTYPE_END_OF_FILE);
+	}
 
 //	display_reserved_words_table();
 //	display_special_characters_table();

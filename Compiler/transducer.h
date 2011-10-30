@@ -19,7 +19,7 @@
 #include "file_reader.h"
 #include "linked_list.h" 
 
-#define NUM_STATES 9
+#define NUM_STATES 10
 #define NUM_TYPE_CHARS 10
 
 typedef enum {

@@ -53,7 +53,8 @@ type_char get_type_char(char c) {
 		return linebreak;
 	else if (c == '+' || c == '-' || c == '*' || c == '/' || 
 			 c == ';' || c == '<' || c == '>' || c == '(' || 
-			 c == ')' || c == '“' || c == '{' || c == '}')
+			 c == ')' || c == '.' || c == '{' || c == '}' ||
+			 c == '[' || c == ']' || c == ',' )
 		return special;
 	else if (c == EOF) 
 		return eof;
@@ -62,6 +63,10 @@ type_char get_type_char(char c) {
 }
 
 void init_transition_table() {
+	int i, j;
+	for (i = 0; i < NUM_STATES; i++)
+		for (j = 0; j < NUM_TYPE_CHARS; j++)
+			transition_table[i][j] = 0;
 
 	/* TTYPE_IDENT_OR_RESERV */
 	transition_table[1][letter] = 2;
