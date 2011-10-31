@@ -12,6 +12,7 @@
  */
 
 #include "spa.h"
+#include "semantic.h"
 
 /***********************************************************/
 /* 						PRIVATE							   */
@@ -82,8 +83,7 @@ int current_machine_is_in_final_state() {
 }
 
 void return_machine() {
-	printf("//TODO\n"); //TODO: dummy semantic action
-
+	semantico_tbd();
 	current_machine = spa_stack_pop(spa_stack);
 }
 
@@ -97,7 +97,7 @@ int machine_call_for_current_machine() {
 }
 
 void call_machine(int machine_type) {
-	printf("//TODO\n"); //TODO: dummy semantic action
+	semantico_tbd();
 
 	current_machine.current_state = current_machine.machine_calls[current_machine.current_state][machine_type];
 	spa_stack_push(current_machine, spa_stack);
@@ -107,7 +107,7 @@ void call_machine(int machine_type) {
 }
 
 void transition_to_next_state (int next_state) {
-	printf("//TODO\n"); //TODO: dummy semantic action
+	semantico_tbd();
 
 	current_machine.current_state = next_state;
 }
@@ -116,21 +116,21 @@ int transition_current_machine_with_token(int machine_token_type) {
 
 	int next_state = current_machine.transition_table[current_machine.current_state][machine_token_type];
 
-	// transition is valid
+	/* transition is valid */
 	if (next_state != MACHINE_INVALID_STATE) {
 		transition_to_next_state(next_state);
 		return 1;
 	}
 
-	// transition was not valid -> check if can call another machine
+	/* transition was not valid -> check if can call another machine */
 	else {
 		int next_machine = machine_call_for_current_machine();
-		// can call another machine
+		/* can call another machine */
 		if (next_machine != MTYPE_INVALID) {
 			call_machine(next_machine);
 			return transition_current_machine_with_token(machine_token_type);
 		}
-		// cannot call another machine -> check if can pop a machine
+		/* cannot call another machine -> check if can pop a machine */
 		if (current_machine_is_in_final_state() && !spa_stack_is_empty(spa_stack)) {
 			return_machine();
 			return transition_current_machine_with_token(machine_token_type);

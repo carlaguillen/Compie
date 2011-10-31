@@ -24,17 +24,16 @@ int main(int argc, char **argv) {
 	spa_init();
 
 	get_next_token(); /* lexical analyser */
-	print_token();
+//	print_token();
 
 	while (token->type != TTYPE_END_OF_FILE) {
 		if (token->type != TTYPE_COMMENT && token->type != TTYPE_STRING)
-//			spa_step();
-			if (!spa_step()) {
+			if (!spa_step()) { /* sintatic analyser */
 				printf("Source code would not be correctly parsed;");
 				break;
 			}
 		get_next_token(); /* lexical analyser */
-		print_token();
+//		print_token();
 	}
 
 //	display_reserved_words_table();
