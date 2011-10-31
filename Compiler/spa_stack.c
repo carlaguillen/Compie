@@ -48,13 +48,16 @@ void spa_stack_push(Machine machine, SpaStack * stack) {
 }
 
 Machine spa_stack_pop(SpaStack * stack) {
+	
+	SpaNode * head;
+	Machine machine; 
 	if (spa_stack_is_empty(stack)) {
 		fputs("Error: underflow on SpaStack\n", stderr);
 		abort();
 	}
 
-	SpaNode * head = stack->head;
-	Machine machine = machines_array[head->machine_id];
+	head = stack->head;
+	machine = machines_array[head->machine_id];
 	machine.current_state = head->state;
 	stack->head = head->next;
 	free(head);
