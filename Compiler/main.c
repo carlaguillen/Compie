@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
 	spa_init();
 
 	get_next_token(); /* lexical analyser */
-//	print_token();
+/*	print_token(); */
 
 	while (token->type != TTYPE_END_OF_FILE) {
 		if (token->type != TTYPE_COMMENT && token->type != TTYPE_STRING)
@@ -33,12 +33,13 @@ int main(int argc, char **argv) {
 				break;
 			}
 		get_next_token(); /* lexical analyser */
-//		print_token();
+/*		print_token(); */
 	}
 
-//	display_reserved_words_table();
-//	display_special_characters_table();
-//	display_identifiers_table();
-
+/*
+	display_reserved_words_table();
+	display_special_characters_table();
+	display_identifiers_table();
+*/
 	return 0;
 }

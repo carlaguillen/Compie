@@ -14,5 +14,5 @@
 #include "semantic.h"
 
 void semantico_tbd() {
-	printf("//TODO\n"); //TODO: dummy semantic action
+	printf("//TODO\n"); /* TODO: dummy semantic action */
 }

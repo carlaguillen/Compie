@@ -40,7 +40,7 @@ void init_machine(Machine *machine) {
 void init_machines() {
 	Machine program, command, expression;
 
-	// Machine Program: MTYPE_PROGRAM
+	/* Machine Program: MTYPE_PROGRAM */
 	init_machine(&program);
 
 	program.machine_id = MTYPE_PROGRAM;
@@ -48,7 +48,7 @@ void init_machines() {
 
 	program.final_state[0] = 10;
 
-	// transition table
+	/* transition table */
 	program.transition_table[0][MTTYPE_PROGRAM] = 1;
 
 	program.transition_table[1][MTTYPE_TYPEDEF] = 2;
@@ -229,14 +229,14 @@ void init_machines() {
 	program.transition_table[68][MTTYPE_COMMA] = 65;
 	program.transition_table[68][MTTYPE_RIGHT_PARENTHESES] = 44;
 
-	// machine call transitions
+	/* machine call transitions */
 	program.machine_calls[7][MTYPE_COMMAND] = 11;
 	program.machine_calls[11][MTYPE_COMMAND] = 11;
 	program.machine_calls[45][MTYPE_COMMAND] = 48;
 	program.machine_calls[48][MTYPE_COMMAND] = 48;
 
 
-	// Machine Command: MTYPE_COMMAND
+	/* Machine Command: MTYPE_COMMAND */
 	init_machine(&command);
 
 	command.machine_id = MTYPE_COMMAND;
@@ -245,7 +245,7 @@ void init_machines() {
 	command.final_state[0] = 11;
 	command.final_state[1] = 25;
 
-	// transition table
+	/* transition table */
 	command.transition_table[0][MTTYPE_IDENTIFIER] = 1;
 	command.transition_table[0][MTTYPE_IF] = 2;
 	command.transition_table[0][MTTYPE_WHILE] = 3;
@@ -295,7 +295,7 @@ void init_machines() {
 
 	command.transition_table[25][MTTYPE_ELSE] = 17;
 
-	// machine call transitions
+	/* machine call transitions */
 	command.machine_calls[5][MTYPE_EXPRESSION] = 9;
 	command.machine_calls[6][MTYPE_EXPRESSION] = 9;
 	command.machine_calls[8][MTYPE_EXPRESSION] = 10;
@@ -307,7 +307,7 @@ void init_machines() {
 	command.machine_calls[24][MTYPE_COMMAND] = 24;
 
 
-	// Machine Expression: MTYPE_EXPRESSION
+	/* Machine Expression: MTYPE_EXPRESSION */
 	init_machine(&expression);
 
 	expression.machine_id = MTYPE_EXPRESSION;
@@ -316,7 +316,7 @@ void init_machines() {
 	expression.final_state[0] = 1;
 	expression.final_state[1] = 4;
 
-	// transition table
+	/* transition table */
 	expression.transition_table[0][MTTYPE_TRUE]  = 1;
 	expression.transition_table[0][MTTYPE_FALSE] = 1;
 	expression.transition_table[0][MTTYPE_NOT] = 2;
@@ -348,7 +348,7 @@ void init_machines() {
 
 	expression.transition_table[10][MTTYPE_RIGHT_SQUARE_BRACKET] = 1;
 
-	// machine call transitions
+	/* machine call transitions */
 	expression.machine_calls[0][MTYPE_EXPRESSION] = 3;
 	expression.machine_calls[2][MTYPE_EXPRESSION] = 1;
 	expression.machine_calls[7][MTYPE_EXPRESSION] = 8;
