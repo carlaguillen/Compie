@@ -22,6 +22,18 @@
 
 #define INDEX_NOT_FOUND -1
 
+/*TODO: Create strcut to hold attributes of the declarations
+ Attributes {
+ String lexeme;
+ Tipo tipo;
+ bool wasDeclared;
+ bool wasReferenced;
+ int posMem;
+ }
+*/
+
+
+/*TODO: Modify linked list to support attributes */
 typedef struct node {
   char * data;
   struct node * next;
@@ -29,6 +41,8 @@ typedef struct node {
 
 typedef struct list {
   Node * head;
+/*TODO:  List *parent; */
+
 } List;
 
 List * empty_list();
