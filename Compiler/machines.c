@@ -334,9 +334,8 @@ void init_machines() {
 	expression.transition_table[1][MTTYPE_MULTIPLICATION] = 4;
 	expression.transition_table[1][MTTYPE_DIVISION] = 4;
 
-
 	expression.transition_table[3][MTTYPE_LEFT_SQUARE_BRACKET] = 5;
-	expression.transition_table[3][MTTYPE_DOT] = 5;
+	expression.transition_table[3][MTTYPE_DOT] = 6;
 	expression.transition_table[3][MTTYPE_LEFT_PARENTHESES] = 7;
 	expression.transition_table[3][MTTYPE_GREATER_THAN] = 4;
 	expression.transition_table[3][MTTYPE_LESS_THAN] = 4;

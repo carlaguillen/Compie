@@ -17,6 +17,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-void semantico_tbd();
+#include "semantic_actions.h"
 
 #endif /* SEMANTIC_H_ */

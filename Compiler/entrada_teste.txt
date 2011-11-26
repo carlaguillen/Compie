@@ -20,6 +20,7 @@ function int fatorialIterativo(int n) {
 }
 
 main {
+	declare struct s s1;
     declare int fatorialRecursivoDe10, int fatorialIterativoDe10;
     fatorialRecursivoDe10 = fatorialRecursivo(10);
     fatorialIterativoDe10 = fatorialIterativo(10);

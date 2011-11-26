@@ -84,7 +84,7 @@ int current_machine_is_in_final_state() {
 }
 
 void return_machine() {
-	semantico_tbd();
+	actions_on_machine_return[current_machine.machine_id][current_machine.current_state]();
 	current_machine = spa_stack_pop(spa_stack);
 }
 
@@ -98,7 +98,7 @@ int machine_call_for_current_machine() {
 }
 
 void call_machine(int machine_type) {
-	semantico_tbd();
+	actions_on_machine_transition[current_machine.machine_id][current_machine.current_state][machine_type]();
 
 	current_machine.current_state = current_machine.machine_calls[current_machine.current_state][machine_type];
 	spa_stack_push(current_machine, spa_stack);
@@ -108,8 +108,7 @@ void call_machine(int machine_type) {
 }
 
 void transition_to_next_state (int next_state) {
-	semantico_tbd();
-
+	actions_on_state_transition[current_machine.machine_id][current_machine.current_state][spa_convert_token_to_machine_type()]();
 	current_machine.current_state = next_state;
 }
 
@@ -149,6 +148,7 @@ void spa_init() {
 	init_machines();
 	spa_stack = empty_spa_stack();
 	current_machine = machines_array[MTYPE_PROGRAM];
+	init_semantic_actions();
 }
 
 int spa_step() {
