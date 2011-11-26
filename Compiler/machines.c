@@ -280,7 +280,7 @@ void init_machines() {
 
 	command.transition_table[16][MTTYPE_RIGHT_PARENTHESES] = 17;
 
-	command.transition_table[17][MTTYPE_RIGHT_CURLY_BRACKET] = 19;
+	command.transition_table[17][MTTYPE_LEFT_CURLY_BRACKET] = 19;
 
 	command.transition_table[19][MTTYPE_RIGHT_CURLY_BRACKET] = 11;
 
@@ -314,45 +314,56 @@ void init_machines() {
 	expression.current_state = 0;
 
 	expression.final_state[0] = 1;
-	expression.final_state[1] = 4;
+	expression.final_state[1] = 3;
+	expression.final_state[2] = 8;
 
 	/* transition table */
 	expression.transition_table[0][MTTYPE_TRUE]  = 1;
 	expression.transition_table[0][MTTYPE_FALSE] = 1;
 	expression.transition_table[0][MTTYPE_NOT] = 2;
 	expression.transition_table[0][MTTYPE_NUMBER] = 1;
-	expression.transition_table[0][MTTYPE_IDENTIFIER] = 4;
+	expression.transition_table[0][MTTYPE_IDENTIFIER] = 3;
 
-	expression.transition_table[3][MTTYPE_GREATER_THAN] = 2;
-	expression.transition_table[3][MTTYPE_LESS_THAN] = 2;
-	expression.transition_table[3][MTTYPE_EQUAL_EQUAL] = 2;
-	expression.transition_table[3][MTTYPE_AND] = 2;
-	expression.transition_table[3][MTTYPE_OR] = 2;
-	expression.transition_table[3][MTTYPE_PLUS] = 2;
-	expression.transition_table[3][MTTYPE_MINUS] = 2;
-	expression.transition_table[3][MTTYPE_MULTIPLICATION] = 2;
-	expression.transition_table[3][MTTYPE_DIVISION] = 2;
+	expression.transition_table[1][MTTYPE_GREATER_THAN] = 4;
+	expression.transition_table[1][MTTYPE_LESS_THAN] = 4;
+	expression.transition_table[1][MTTYPE_EQUAL_EQUAL] = 4;
+	expression.transition_table[1][MTTYPE_AND] = 4;
+	expression.transition_table[1][MTTYPE_OR] = 4;
+	expression.transition_table[1][MTTYPE_PLUS] = 4;
+	expression.transition_table[1][MTTYPE_MINUS] = 4;
+	expression.transition_table[1][MTTYPE_MULTIPLICATION] = 4;
+	expression.transition_table[1][MTTYPE_DIVISION] = 4;
 
-	expression.transition_table[4][MTTYPE_LEFT_SQUARE_BRACKET] = 5;
-	expression.transition_table[4][MTTYPE_DOT] = 6;
-	expression.transition_table[4][MTTYPE_LEFT_PARENTHESES] = 7;
 
-	expression.transition_table[5][MTTYPE_NUMBER] = 10;
+	expression.transition_table[3][MTTYPE_LEFT_SQUARE_BRACKET] = 5;
+	expression.transition_table[3][MTTYPE_DOT] = 5;
+	expression.transition_table[3][MTTYPE_LEFT_PARENTHESES] = 7;
+	expression.transition_table[3][MTTYPE_GREATER_THAN] = 4;
+	expression.transition_table[3][MTTYPE_LESS_THAN] = 4;
+	expression.transition_table[3][MTTYPE_EQUAL_EQUAL] = 4;
+	expression.transition_table[3][MTTYPE_AND] = 4;
+	expression.transition_table[3][MTTYPE_OR] = 4;
+	expression.transition_table[3][MTTYPE_PLUS] = 4;
+	expression.transition_table[3][MTTYPE_MINUS] = 4;
+	expression.transition_table[3][MTTYPE_MULTIPLICATION] = 4;
+	expression.transition_table[3][MTTYPE_DIVISION] = 4;
+
+	expression.transition_table[5][MTTYPE_NUMBER] = 11;
 
 	expression.transition_table[6][MTTYPE_IDENTIFIER] = 1;
 
 	expression.transition_table[7][MTTYPE_RIGHT_PARENTHESES] = 1;
 
-	expression.transition_table[8][MTTYPE_COMMA] = 9;
-	expression.transition_table[8][MTTYPE_RIGHT_PARENTHESES] = 1;
+	expression.transition_table[9][MTTYPE_COMMA] = 10;
+	expression.transition_table[9][MTTYPE_RIGHT_PARENTHESES] = 1;
 
-	expression.transition_table[10][MTTYPE_RIGHT_SQUARE_BRACKET] = 1;
+	expression.transition_table[11][MTTYPE_RIGHT_SQUARE_BRACKET] = 1;
 
 	/* machine call transitions */
-	expression.machine_calls[0][MTYPE_EXPRESSION] = 3;
 	expression.machine_calls[2][MTYPE_EXPRESSION] = 1;
-	expression.machine_calls[7][MTYPE_EXPRESSION] = 8;
-	expression.machine_calls[9][MTYPE_EXPRESSION] = 8;
+	expression.machine_calls[4][MTYPE_EXPRESSION] = 8;
+	expression.machine_calls[7][MTYPE_EXPRESSION] = 9;
+	expression.machine_calls[10][MTYPE_EXPRESSION] = 9;
 
 	machines_array[MTYPE_PROGRAM] = program;
 	machines_array[MTYPE_COMMAND] = command;

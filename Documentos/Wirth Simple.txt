@@ -2,7 +2,7 @@ programa = "program" { "typedef" "struct" identificador "{" { "declare" ( ( "int
 
 comando = identificador ( "=" ( expressao | "{" expressao{"," expressao} "}" ) | "[" numero "]" "=" expressao | "(" [ expressao {"," expressao} ] ")" ) ";" | "if" "(" expressao ")" "{" {comando} "}" ["else" "{" {comando}"}"] | "while" "(" expressao ")" "{" {comando}"}" | "input" identificador ";" | "output" identificador ";"  | "return" expressao ";" .
 
-expressao = "true" | "false" | "not" expressao | numero | expressao ( ">" | "<" | "==" | "and" | "or" | "+" | "-" | "*" | "/" ) expressao | identificador [ "[" numero "]" | "." identificador | "(" [ expressao {"," expressao} ] ")" ] .
+expressao = ( "true" | "false" | "not" expressao | numero | identificador [ "[" numero "]" | "." identificador | "(" [ expressao {"," expressao} ] ")" ] ) [ ( ">" | "<" | "==" | "and" | "or" | "+" | "-" | "*" | "/" ) expressao ] .
 
 identificador = letra{letra|digito} .
 

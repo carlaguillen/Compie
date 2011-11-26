@@ -1,22 +1,28 @@
-program 
+program
 
-typedef struct s {
-	declare int a;
-	declare boolean b, boolean c;
+function int fatorialRecursivo(int n) {
+    if (n < 2) {
+        return 1;
+    }
+	else {
+        return n * fatorialRecursivo(n-1);
+    }
 }
 
-declare int t4;
-declare boolean v[9];
-declare struct s s1;
-
-function int func (boolean param1, int param2) {
-	output t4;
-	return t4;
+function int fatorialIterativo(int n) {
+    declare int fatorial;
+    fatorial = 1;
+     while (n > 0) {
+        fatorial = fatorial * n;
+           n = n - 1;
+    }
+    return fatorial;
 }
 
 main {
-	declare int a;
-	declare boolean bool;
-	a = func(bool, a);
-	t4 = 1;
+    declare int fatorialRecursivoDe10, int fatorialIterativoDe10;
+    fatorialRecursivoDe10 = fatorialRecursivo(10);
+    fatorialIterativoDe10 = fatorialIterativo(10);
+    output fatorialRecursivoDe10;
+    output fatorialIterativoDe10;
 }

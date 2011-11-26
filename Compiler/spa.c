@@ -21,6 +21,7 @@
 SpaStack *spa_stack;
 
 int spa_convert_token_to_machine_type() {
+
 	switch (token->type) {
 		case TTYPE_RESERVED_WORD:
 			if ( strcmp(token->lexeme, "program")	== 0 ) 			return MTTYPE_PROGRAM;
