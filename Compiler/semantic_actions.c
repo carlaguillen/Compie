@@ -15,7 +15,7 @@
 
 void dummy_semantic_action() {
 	// DOES NOTHING
-	printf("\n");
+	printf("TODO\n");
 }
 
 void init_semantic_actions() {
