@@ -17,7 +17,19 @@
 #define CODE_APPEND "_code.asm"
 #define DATA_APPEND "_data.asm"
 
-Writer * writer;
+void init_code_buffer() {
+	FILE * execution_enviroment = fopen("execution_environment.asm", "r");
+	char buffer[128];
+
+	if (execution_enviroment != NULL)
+		while (!feof(execution_enviroment))
+			fputs(fgets(buffer, sizeof(buffer), execution_enviroment), writer->code_buffer);
+	fclose(execution_enviroment);
+}
+
+void init_data_buffer() {
+	fprintf(writer->data_buffer, "\t\t @ /0600\n");
+}
 
 void init_file_writer(char * path) {
 	writer = (Writer *)malloc(sizeof(Writer));
@@ -26,12 +38,14 @@ void init_file_writer(char * path) {
 	char * filepath = remove_ext(path, '.', '/');
 	strcat(filepath, CODE_APPEND);
 	writer->code_buffer = fopen(filepath, "w+");
+	if(writer->code_buffer == NULL) fprintf(stderr,"Could not create writer code buffer.\n");
+	else init_code_buffer();
 
 	filepath = remove_ext(path, '.', '/');
 	strcat(filepath, DATA_APPEND);
 	writer->data_buffer = fopen(filepath, "w+");
-
-	if(writer->code_buffer == NULL || writer->data_buffer == NULL) fprintf(stderr,"Could not create writer buffers.\n");
+	if (writer->data_buffer == NULL) fprintf(stderr,"Could not create writer data buffer.\n");
+	else init_data_buffer();
 }
 
 void write_to_data(char * string) {

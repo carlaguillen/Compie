@@ -24,7 +24,7 @@ typedef struct _writer {
     FILE * data_buffer;
 } Writer;
 
-extern Writer * writer;
+Writer * writer;
 
 void init_file_writer(char * path);
 

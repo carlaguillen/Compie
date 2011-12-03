@@ -127,4 +127,3 @@ i_end		LD	i_negative			; Transforma em negativo se negativo
 i_return	LD	input_number		;
 			RS	input				;
 
-		LD  K0		; Carrega constante

@@ -1,29 +1,7 @@
 program
 
-function int fatorialRecursivo(int n) {
-    if (n < 2) {
-        return 1;
-    }
-	else {
-        return n * fatorialRecursivo(n-1);
-    }
-}
-
-function int fatorialIterativo(int n) {
-    declare int fatorial;
-    fatorial = 1;
-     while (n > 0) {
-        fatorial = fatorial * n;
-           n = n - 1;
-    }
-    return fatorial;
-}
-
 main {
-	declare struct s s1;
-    declare int fatorialRecursivoDe10, int fatorialIterativoDe10;
-    fatorialRecursivoDe10 = fatorialRecursivo(10);
-    fatorialIterativoDe10 = fatorialIterativo(10);
-    output fatorialRecursivoDe10;
-    output fatorialIterativoDe10;
+	declare int a;
+	a = 2;
+	output a;
 }

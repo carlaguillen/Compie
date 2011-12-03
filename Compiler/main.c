@@ -29,15 +29,13 @@ int main(int argc, char **argv) {
 	while (token->type != TTYPE_END_OF_FILE) {
 		if (token->type != TTYPE_COMMENT && token->type != TTYPE_STRING)
 			if (!spa_step()) { /* sintatic analyser */
-				printf("Source code would not be correctly parsed;");
+				fprintf(stderr, "Source code would not be correctly parsed;");
 				break;
 			}
 		get_next_token(); /* lexical analyser */
 
 	}
 
-	write_to_code("isso e codigo!\n");
-	write_to_data(" mas isso sao dados!\n");
 	close_file_writer();
 	merge_code_data();
 	return 0;
