@@ -38,5 +38,6 @@ int main(int argc, char **argv) {
 
 	close_file_writer();
 	merge_code_data();
+
 	return 0;
 }

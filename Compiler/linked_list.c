@@ -50,9 +50,9 @@ void display_list(List * list) {
 Node * get_node_at_index(int index, List * list) {
 	int i = 0;
 	Node * node = list->head;
-	if(node == NULL) return NULL;
 
 	while(i < index) {
+		if(node == NULL) return NULL;
 		node = node->next;
 		i++;
 	}

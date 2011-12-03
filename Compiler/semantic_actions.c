@@ -114,6 +114,10 @@ void push_operator(Token *token) {
 	}
 }
 
+void push_identifier(Token *token) {
+
+}
+
 void expression_end(Token *token) {
 	if(!stack_is_empty(operator_stack)) {
 		resolve_expression();
@@ -353,7 +357,7 @@ void init_semantic_actions() {
 	actions_on_state_transition[MTYPE_EXPRESSION][0][MTTYPE_FALSE] = push_operand_false;
 //	actions_on_state_transition[MTYPE_EXPRESSION][0][MTTYPE_NOT] = 2;
 	actions_on_state_transition[MTYPE_EXPRESSION][0][MTTYPE_NUMBER] = push_operand;
-//	actions_on_state_transition[MTYPE_EXPRESSION][0][MTTYPE_IDENTIFIER] = 3;
+	actions_on_state_transition[MTYPE_EXPRESSION][0][MTTYPE_IDENTIFIER] = push_identifier;
 //
 //	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_GREATER_THAN] = 4;
 //	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_LESS_THAN] = 4;
