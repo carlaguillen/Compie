@@ -15,17 +15,17 @@
 #include "file_reader.h"
 #include "table_of_symbols.h"
 #include "spa.h"
+#include "file_writer.h"
 
 int main(int argc, char **argv) {
 
 	init_file_reader("entrada_teste.txt");
+	init_file_writer("entrada_teste.txt");
 	init_token();
 	init_transition_table();
 	spa_init();
 
 	get_next_token(); /* lexical analyser */
-/*	print_token(); */
-
 	while (token->type != TTYPE_END_OF_FILE) {
 		if (token->type != TTYPE_COMMENT && token->type != TTYPE_STRING)
 			if (!spa_step()) { /* sintatic analyser */
@@ -33,13 +33,12 @@ int main(int argc, char **argv) {
 				break;
 			}
 		get_next_token(); /* lexical analyser */
-/*		print_token(); */
+
 	}
 
-/*
-	display_reserved_words_table();
-	display_special_characters_table();
-	display_identifiers_table();
-*/
+	write_to_code("isso e codigo!\n");
+	write_to_data(" mas isso sao dados!\n");
+	close_file_writer();
+	merge_code_data();
 	return 0;
 }
