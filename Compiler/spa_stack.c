@@ -52,7 +52,7 @@ Machine spa_stack_pop(SpaStack * stack) {
 	SpaNode * head;
 	Machine machine; 
 	if (spa_stack_is_empty(stack)) {
-		fputs("Error: underflow on SpaStack\n", stderr);
+		fprintf(stderr, "Error: underflow on SpaStack\n");
 		abort();
 	}
 

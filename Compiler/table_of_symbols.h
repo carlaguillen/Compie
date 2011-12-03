@@ -24,13 +24,21 @@
 extern char * reserved_words_table[];
 extern char * special_characters_table[];
 extern List * identifiers_table;
+extern List * constants_table;
 
 int search_reserved_words_table(char * data);
 int search_special_characters_table(char * data);
 
 int search_identifiers_table(char * data);
 int add_identifiers_table(char * data);
-int add_if_new_indetifiers_table(char * data);
+int add_if_new_identifiers_table(char * data);
+Node * get_identifier_at_index(int index);
+
+int search_constants_table(char * data);
+int add_constants_table(char * data);
+int add_if_new_constants_table(char * data);
+Node * get_constant_at_index(int index);
+
 void display_identifiers_table();
 void display_reserved_words_table();
 void display_special_characters_table();

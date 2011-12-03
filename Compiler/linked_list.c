@@ -22,6 +22,7 @@ Node * createnode(char * data);
 Node * createnode(char * data){
   Node * newNode = malloc(sizeof(Node));
   newNode->data = data;
+  newNode->label = NULL;
   newNode->next = NULL;
   return newNode;
 }
@@ -29,6 +30,7 @@ Node * createnode(char * data){
 List * empty_list(){
   List * list = malloc(sizeof(List));
   list->head = NULL;
+  list->parent = NULL;
   return list;
 }
 
@@ -43,6 +45,18 @@ void display_list(List * list) {
 	i++;
   }
   printf("%d\t|\t%s\n", i, current->data);
+}
+
+Node * get_node_at_index(int index, List * list) {
+	int i = 0;
+	Node * node = list->head;
+	if(node == NULL) return NULL;
+
+	while(i < index) {
+		node = node->next;
+		i++;
+	}
+	return node;
 }
 
 int add_list(char * data, List * list){
@@ -123,4 +137,8 @@ void alloc_add_list(char data, List * list) {
 	char * ptr = (char *)malloc(sizeof(char));
 	*ptr = data;
 	add_list(ptr, list);
+}
+
+void create_child(List * list) {
+	list->parent = empty_list();
 }

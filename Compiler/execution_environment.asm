@@ -1,5 +1,5 @@
 		@ /0000 ;
-P		JP	main;
+programa		SC	main	;
 zero			K	=0		;
 one				K	=1		;
 ten				K 	=10		;

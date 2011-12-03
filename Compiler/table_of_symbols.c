@@ -35,6 +35,7 @@ int search_table(char * data, char * table[]) {
 char * reserved_words_table[LEN_OF_RESERVED_TABLE] = { "program", "main", "typedef", "declare", "function", "return", "struct", "int", "boolean", "if", "else", "while", "input", "output", "true", "false", "and", "or", "not", "void","string", "def"};
 char * special_characters_table[LEN_OF_SPECIAL_CHAR_TABLE] = { "{", "}", "[", "]", "(", ")", ";", ",", ".", "=", ">", "<", "==", "+", "-", "*", "/", "\""};
 List * identifiers_table = NULL;
+List * constants_table = NULL;
 
 int search_reserved_words_table(char * data) {
 	int i;
@@ -60,10 +61,34 @@ int add_identifiers_table(char * data) {
 	return add_list(data, identifiers_table);
 }
 
-int add_if_new_indetifiers_table(char * data) {
+int add_if_new_identifiers_table(char * data) {
 	int index = search_identifiers_table(data);
 	if(index == INDEX_NOT_FOUND) index = add_identifiers_table(data);
 	return index;
+}
+
+Node * get_identifier_at_index(int index) {
+	return get_node_at_index(index, identifiers_table);
+}
+
+int search_constants_table(char * data) {
+	if (constants_table == NULL) constants_table =  empty_list();
+	return search_list(data, constants_table);
+}
+
+int add_constants_table(char * data) {
+	if (constants_table == NULL) constants_table =  empty_list();
+	return add_list(data, constants_table);
+}
+
+int add_if_new_constants_table(char * data) {
+	int index = search_constants_table(data);
+	if(index == INDEX_NOT_FOUND) index = add_constants_table(data);
+	return index;
+}
+
+Node * get_constant_at_index(int index) {
+	return get_node_at_index(index, constants_table);
 }
 
 void display_identifiers_table() {

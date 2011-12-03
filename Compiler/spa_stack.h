@@ -11,8 +11,8 @@
  *
  */
 
-#ifndef STACK_H_
-#define STACK_H_
+#ifndef SPA_STACK_H_
+#define SPA_STACK_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,4 +33,4 @@ void spa_stack_push(Machine machine, SpaStack * stack);
 Machine spa_stack_pop(SpaStack * stack);
 int spa_stack_is_empty(SpaStack *stack);
 
-#endif /* STACK_H_ */
+#endif /* SPA_STACK_H_ */

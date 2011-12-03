@@ -32,20 +32,20 @@
  }
 */
 
-
 /*TODO: Modify linked list to support attributes */
 typedef struct node {
   char * data;
+  char * label;
   struct node * next;
 } Node;
 
 typedef struct list {
   Node * head;
-/*TODO:  List *parent; */
-
+  struct list * parent;
 } List;
 
 List * empty_list();
+Node * get_node_at_index(int index, List *list);
 int add_list(char * data, List * list);
 int search_list(char * data, List *list);
 void delete_list(char * data, List * list);
@@ -53,5 +53,6 @@ void display_list(List * list);
 void destroy_list(List * list);
 char * get_string_array(List * list);
 void alloc_add_list(char data, List * list);
+void create_child(List * list);
 
 #endif /* LINKED_LIST_H_ */

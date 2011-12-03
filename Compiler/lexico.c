@@ -37,7 +37,7 @@ void complete_token() {
 				token->value = index_of_reserved;
 			} else {
 				token->type = TTYPE_IDENTIFIER;
-				token->value = add_if_new_indetifiers_table(token->lexeme);
+				token->value = add_if_new_identifiers_table(token->lexeme);
 			}
 		}
 		break;

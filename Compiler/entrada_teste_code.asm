@@ -1,5 +1,5 @@
 		@ /0000 ;
-P		JP	main;
+programa		SC	main;
 zero			K	=0		;
 one				K	=1		;
 ten				K 	=10		;
@@ -127,4 +127,13 @@ i_end		LD	i_negative			; Transforma em negativo se negativo
 i_return	LD	input_number		;
 			RS	input				;
 
-		LD  K0		; Carrega constante
+main		JP  /0000		;
+			LD  K1		;
+			/   K2		;
+			MM  T0		;
+			LD  K0		;
+			-   T0		;
+			MM  T1		;
+			HM  /00		;
+			#  P 		;
+
