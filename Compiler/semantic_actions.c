@@ -26,6 +26,7 @@ char buffer[100];
 
 static int constant_counter 	= 0;
 static int temp_counter 		= 0;
+static int temp_label_counter	= 0;
 static int variable_counter 	= 0;
 static int loop_counter 		= 0;
 static int if_counter			= 0;
@@ -62,6 +63,14 @@ char * get_temp_label() {
 
 	sprintf(buffer, "%s\t\t\tK  =%d\t\t; Declaracao de temporario\n", temp, 0);
 	write_to_data(buffer);
+	return temp;
+}
+
+char * get_temp_label_label() {
+	char * temp = (char *)malloc(10*sizeof(char));
+	sprintf(temp, "TL%d", temp_label_counter);
+	temp_label_counter++;
+
 	return temp;
 }
 
@@ -191,12 +200,18 @@ void resolve_input() {
 }
 
 void resolve_assign() {
-	sprintf(buffer, "\t\t\tMM  %s\t\t; Variable assign\n", stack_pop(command_operand_stack));
+	sprintf(buffer, "\t\t\tLD  %s\t\t; Atribuicao de variavel\n", stack_pop(operand_stack));
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tMM  %s\t\t;\n", stack_pop(command_operand_stack));
 	write_to_code(buffer);
 }
 
 void resolve_while() {
 	char * label = stack_check(command_operand_stack);
+
+	sprintf(buffer, "\t\t\tLD  %s\t\t;\n", stack_pop(operand_stack));
+	write_to_code(buffer);
 
 	sprintf(buffer, "\t\t\tJN  _%s\t\t;\n", label);
 	write_to_code(buffer);
@@ -222,6 +237,9 @@ void resolve_end_while() {
 
 void resolve_if() {
 	char * label = stack_check(command_operand_stack);
+
+	sprintf(buffer, "\t\t\tLD  %s\t\t;\n", stack_pop(operand_stack));
+	write_to_code(buffer);
 
 	sprintf(buffer, "\t\t\tJN  _%s\t\t;\n", label);
 	write_to_code(buffer);
@@ -285,12 +303,12 @@ void resolve_command(Token *token) {
 
 int operator_precedence(char * operator) {
 	if(operator != NULL) {
-		if(strcmp(operator, "+") == 0) return 1;
-		if(strcmp(operator, "-") == 0) return 1;
-		if(strcmp(operator, "*") == 0) return 2;
-		if(strcmp(operator, "/") == 0) return 2;
-		if(strcmp(operator, ">") == 0) return 0;
-		if(strcmp(operator, "<") == 0) return 0;
+		if(strcmp(operator, "+") == 0) return 2;
+		if(strcmp(operator, "-") == 0) return 2;
+		if(strcmp(operator, "*") == 0) return 3;
+		if(strcmp(operator, "/") == 0) return 3;
+		if(strcmp(operator, ">") == 0) return 1;
+		if(strcmp(operator, "<") == 0) return 1;
 	}
 	return -1;
 }
@@ -346,14 +364,14 @@ void resolve_compare_equal_equal() {
 	sprintf(buffer, "\t\t\t-  %s\t\t;\n", Y);
 	write_to_code(buffer);
 
-	char * is_equal = get_temp_label();
+	char * is_equal = get_temp_label_label();
 	sprintf(buffer, "\t\t\tJZ  %s\t\t;\n", is_equal);
 	write_to_code(buffer);
 
 	sprintf(buffer, "\t\t\tLD  zero\t; Nao e igual\n");
 	write_to_code(buffer);
 
-	char * is_not_equal = get_temp_label();
+	char * is_not_equal = get_temp_label_label();
 	sprintf(buffer, "\t\t\tJP  %s\t\t;\n", is_not_equal);
 	write_to_code(buffer);
 
@@ -365,6 +383,140 @@ void resolve_compare_equal_equal() {
 	write_to_code(buffer);
 
 	stack_push(operand_stack, temp);
+}
+
+void resolve_logic_and() {
+	char * X = stack_pop(operand_stack);
+
+	sprintf(buffer, "\t\t\tLD  %s\t\t; Comeco do and logico\n", X);
+	write_to_code(buffer);
+
+	char * temp = get_temp_label_label();
+	sprintf(buffer, "\t\t\tJZ  %s\t\t; Returns NO\n", temp);
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tJN  %s\t\t; Returns NO\n", temp);
+	write_to_code(buffer);
+
+	stack_push(operand_stack, temp);
+	stack_push(operator_stack, "_and");
+}
+
+void end_logic_and() {
+	char * Y = stack_pop(operand_stack);
+	char * no_label = stack_pop(operand_stack);
+
+	sprintf(buffer, "\t\t\tLD  %s\t\t;\n", Y);
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tJZ  %s\t\t; Returns NO\n", no_label);
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tJN  %s\t\t; Returns NO\n", no_label);
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tLD  one\t\t;\n");
+	write_to_code(buffer);
+
+	char * yes_label = get_temp_label_label();
+	sprintf(buffer, "\t\t\tJP  %s\t\t; Returns YES\n", yes_label);
+	write_to_code(buffer);
+
+	sprintf(buffer, "%s\t\t\tLD zero\t;\n", no_label);
+	write_to_code(buffer);
+
+	char * temp = get_temp_label();
+	sprintf(buffer, "%s\t\t\tMM  %s\t\t; Fim do and logico\n", yes_label, temp);
+	write_to_code(buffer);
+
+	stack_push(operand_stack, temp);
+}
+
+void resolve_logic_or() {
+	char * X = stack_pop(operand_stack);
+
+	sprintf(buffer, "\t\t\tLD  %s\t\t; Comeco do or logico\n", X);
+	write_to_code(buffer);
+
+	char * temp = get_temp_label_label();
+	sprintf(buffer, "\t\t\tJZ  %s\t\t;\n", temp);
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tJN  %s\t\t;\n", temp);
+	write_to_code(buffer);
+
+	char * yes_label = get_temp_label_label();
+	sprintf(buffer, "\t\t\tJP  %s\t\t; Returns YES\n", yes_label);
+	write_to_code(buffer);
+
+	stack_push(operand_stack, yes_label);
+	stack_push(operand_stack, temp);
+	stack_push(operator_stack, "_or");
+}
+
+void end_logic_or() {
+	char * Y = stack_pop(operand_stack);
+	char * temp = stack_pop(operand_stack);
+	char * yes_label = stack_pop(operand_stack);
+
+	sprintf(buffer, "%s\t\t\tLD  %s\t\t;\n", temp, Y);
+	write_to_code(buffer);
+
+	char * temp2 = get_temp_label_label();
+	sprintf(buffer, "\t\t\tJZ  %s\t\t;\n", temp2);
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tJN  %s\t\t;\n", temp2);
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tJP  %s\t\t; Returns YES\n", yes_label);
+	write_to_code(buffer);
+
+	sprintf(buffer, "%s\t\t\tLD  zero\t;\n", temp2);
+	write_to_code(buffer);
+
+	char * no_label = get_temp_label_label();
+	sprintf(buffer, "\t\t\tJP  %s\t\t; Returns NO\n", no_label);
+	write_to_code(buffer);
+
+	sprintf(buffer, "%s\t\t\tLD one\t\t;\n", yes_label);
+	write_to_code(buffer);
+
+	char * temp3 = get_temp_label();
+	sprintf(buffer, "%s\t\t\tMM  %s\t\t; Fim do or logico\n", no_label, temp3);
+	write_to_code(buffer);
+
+	stack_push(operand_stack, temp3);
+}
+
+void resolve_logic_not() {
+	char * Y = stack_pop(operand_stack);
+
+	sprintf(buffer, "\t\t\tLD  %s\t\t; Comeco do not logico\n", Y);
+	write_to_code(buffer);
+
+	char * temp = get_temp_label_label();
+	sprintf(buffer, "\t\t\tJZ  %s\t\t; Returns NO\n", temp);
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tJN  %s\t\t; Returns NO\n", temp);
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tLD  one\t\t;\n");
+	write_to_code(buffer);
+
+	char * temp2 = get_temp_label_label();
+	sprintf(buffer, "\t\t\tJP  %s\t\t; Returns YES\n", temp2);
+	write_to_code(buffer);
+
+	sprintf(buffer, "%s\t\t\tLD zero\t\t;\n", temp);
+	write_to_code(buffer);
+
+	char * temp3 = get_temp_label();
+	sprintf(buffer,"%s\t\t\tMM  %s\t\t; Fim do not logico\n",temp2, temp3);
+	write_to_code(buffer);
+
+	stack_push(operand_stack, temp3);
 }
 
 // X o Y
@@ -394,6 +546,11 @@ void resolve_expression() {
 	if(strcmp(o, ">") == 0) resolve_compare_greater_than();
 	else if(strcmp(o, "<") == 0) resolve_compare_less_than();
 	else if(strcmp(o, "==") == 0) resolve_compare_equal_equal();
+	else if(strcmp(o, "and") == 0) resolve_logic_and();
+	else if(strcmp(o, "_and") == 0) end_logic_and();
+	else if(strcmp(o, "or") == 0) resolve_logic_or();
+	else if(strcmp(o, "_or") == 0) end_logic_or();
+	else if(strcmp(o, "not") == 0) resolve_logic_not();
 	else resolve_arithmetic(o);
 }
 
@@ -416,6 +573,8 @@ void push_operator(Token *token) {
 		push_operator(token);
 	} else {
 		stack_push(operator_stack, token->lexeme);
+		if (strcmp(token->lexeme, "and") == 0) resolve_expression();
+		if (strcmp(token->lexeme, "or") == 0) resolve_expression();
 	}
 }
 
@@ -436,10 +595,10 @@ void expression_end(Token *token) {
 	if(!stack_is_empty(operator_stack)) {
 		resolve_expression();
 		expression_end(token);
-	} else if(!stack_is_empty(operand_stack)) {
+	}/* else if(!stack_is_empty(operand_stack)) {
 		sprintf(buffer, "\t\t\tLD  %s\t\t;\n", stack_check(operand_stack));
 		write_to_code(buffer);
-	}
+	}*/
 }
 
 void init_semantic_actions() {
@@ -725,28 +884,28 @@ void init_semantic_actions() {
 	/***********************************************************/
 	actions_on_state_transition[MTYPE_EXPRESSION][0][MTTYPE_TRUE]  = push_operand_true;
 	actions_on_state_transition[MTYPE_EXPRESSION][0][MTTYPE_FALSE] = push_operand_false;
-//	actions_on_state_transition[MTYPE_EXPRESSION][0][MTTYPE_NOT] = 2;
+	actions_on_state_transition[MTYPE_EXPRESSION][0][MTTYPE_NOT] = push_operator;
 	actions_on_state_transition[MTYPE_EXPRESSION][0][MTTYPE_NUMBER] = push_operand;
 	actions_on_state_transition[MTYPE_EXPRESSION][0][MTTYPE_IDENTIFIER] = push_identifier;
 
 	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_GREATER_THAN] = push_operator;
 	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_LESS_THAN] = push_operator;
 	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_EQUAL_EQUAL] = push_operator;
-//	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_AND] = 4;
-//	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_OR] = 4;
+	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_AND] = push_operator;
+	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_OR] = push_operator;
 	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_PLUS] = push_operator;
 	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_MINUS] = push_operator;
 	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_MULTIPLICATION] = push_operator;
 	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_DIVISION] = push_operator;
-//
+
 //	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_LEFT_SQUARE_BRACKET] = 5;
 //	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_DOT] = 6;
 //	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_LEFT_PARENTHESES] = 7;
 	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_GREATER_THAN] = push_operator;
 	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_LESS_THAN] = push_operator;
 	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_EQUAL_EQUAL] = push_operator;
-//	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_AND] = 4;
-//	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_OR] = 4;
+	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_AND] = push_operator;
+	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_OR] = push_operator;
 	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_PLUS] = push_operator;
 	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_MINUS] = push_operator;
 	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_MULTIPLICATION] = push_operator;

@@ -28,7 +28,7 @@ void init_code_buffer() {
 }
 
 void init_data_buffer() {
-	fprintf(writer->data_buffer, "\t\t @ /0600\n");
+	fprintf(writer->data_buffer, "\t\t @ /0A00\n");
 }
 
 void init_file_writer(char * path) {

@@ -128,44 +128,48 @@
 00ea b072		;				RS	input				;
 
 00ec 0000		;	main		JP  /0000		;
-00ee a072		;				SC  input		; Comando de input
-00f0 9600		;				MM  V0		;
-00f2 a072		;				SC  input		; Comando de input
-00f4 9602		;				MM  V1		;
-00f6 8002		;	L0			LD  zero	; Begin while loop
-00f8 8600		;				LD  V0		;
-00fa 212e		;				JN  _L0		;
-00fc 112e		;				JZ  _L0		;
-00fe 8600		;				LD  V0				; Comando de output
-0100 9014		;				MM  output_number	;
-0102 a01a		;				SC  output			;
-0104 8600		;				LD  V0		;
-0106 5604		;				-   K0		;
-0108 9606		;				MM  T0		;
-010a 8606		;				LD  T0		;
-010c 8606		;				LD  T0		;
-010e 9600		;				MM  V0		; Variable assign
-0110 8002		;	I0			LD  zero	; Begin if case
-0112 8602		;				LD  V1		;
-0114 212a		;				JN  _I0		;
-0116 112a		;				JZ  _I0		;
-0118 8602		;				LD  V1				; Comando de output
-011a 9014		;				MM  output_number	;
-011c a01a		;				SC  output			;
-011e 8602		;				LD  V1		;
-0120 5604		;				-   K0		;
-0122 9608		;				MM  T1		;
-0124 8608		;				LD  T1		;
-0126 8608		;				LD  T1		;
-0128 9602		;				MM  V1		; Variable assign
-012a 8002		;	_I0			LD  zero	; End if case
-012c 00f6		;				JP  L0		;
-012e 8002		;	_L0			LD  zero	; End while loop
-0130 c000		;				HM  /00		;
+00ee a072		;				SC  input	; Comando de input
+00f0 9a00		;				MM  V0		;
+00f2 a072		;				SC  input	; Comando de input
+00f4 9a02		;				MM  V1		;
+00f6 8002		;	I0			LD  zero	; Begin if case
+00f8 8a00		;				LD  V0		; Comeco do or logico
+00fa 1100		;				JZ  TL0		;
+00fc 2100		;				JN  TL0		;
+00fe 010c		;				JP  TL1		; Returns YES
+0100 8a02		;	TL0			LD  V1		;
+0102 1108		;				JZ  TL2		;
+0104 2108		;				JN  TL2		;
+0106 010c		;				JP  TL1		; Returns YES
+0108 8002		;	TL2			LD  zero	;
+010a 010e		;				JP  TL3		; Returns NO
+010c 8004		;	TL1			LD one		;
+010e 9a04		;	TL3			MM  T0		; Fim do or logico
+0110 8a04		;				LD  T0		;
+0112 2124		;				JN  _I0		;
+0114 1124		;				JZ  _I0		;
+0116 8a00		;				LD  V0				; Comando de output
+0118 9014		;				MM  output_number	;
+011a a01a		;				SC  output			;
+011c 8a02		;				LD  V1				; Comando de output
+011e 9014		;				MM  output_number	;
+0120 a01a		;				SC  output			;
+0122 0136		;				JP  E0		;
+0124 8002		;	_I0			LD  zero	; End if case/Begin else case
+0126 8a06		;				LD  K0		;
+0128 4a06		;				+   K0		;
+012a 9a08		;				MM  T1		;
+012c 8a08		;				LD  T1		; Atribuicao de variavel
+012e 9a00		;				MM  V0		;
+0130 8a00		;				LD  V0				; Comando de output
+0132 9014		;				MM  output_number	;
+0134 a01a		;				SC  output			;
+0136 8002		;	E0			LD  zero	; End else case
+0138 c000		;				HM  /00		;
 
-				;			 @ /0600
-0600 0000		;	V0			K  =0		; Declaracao de variavel
-0602 0000		;	V1			K  =0		; Declaracao de variavel
-0604 0001		;	K0			K  =1		; Declaracao de constante
-0606 0000		;	T0			K  =0		; Declaracao de temporario
-0608 0000		;	T1			K  =0		; Declaracao de temporario
+				;			 @ /0A00
+0a00 0000		;	V0			K  =0		; Declaracao de variavel
+0a02 0000		;	V1			K  =0		; Declaracao de variavel
+0a04 0000		;	T0			K  =0		; Declaracao de temporario
+0a06 0002		;	K0			K  =2		; Declaracao de constante
+0a08 0000		;	T1			K  =0		; Declaracao de temporario
