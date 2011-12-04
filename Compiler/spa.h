@@ -19,8 +19,9 @@
 
 Machine current_machine;
 
+int spa_convert_token_to_machine_type();
 void spa_init();
 int spa_step();
 
-
+void throw_semantic_exception(int code, char * err);
 #endif /* SPA_H_ */

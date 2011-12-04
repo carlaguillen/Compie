@@ -1,7 +1,7 @@
 program
 
 main {
-	declare int a;
-	a = 1 - 2 / 3;
+declare int a;
+	a = 2 + 3;
 	output a;
 }

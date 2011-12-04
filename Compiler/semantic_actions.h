@@ -23,7 +23,7 @@
 /*						AÇÔES								*/
 /************************************************************/
 /*
- * As ações semânticas consistem três em vetores de funções.
+ * As ações semânticas consistem em três vetores de funções.
  *
  * - actions_on_state_transition[MACHINE_TYPES][MAX_STATES][MTOKEN_TYPES]
  * 		É o vetor de funções que é chamado quando ocorre uma transição

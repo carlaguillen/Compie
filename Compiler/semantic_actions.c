@@ -16,14 +16,23 @@
 #include "token.h"
 #include "table_of_symbols.h"
 #include "stack.h"
+#include "spa.h"
+
+#define ERR_VARIABLE_UNDECLARED 1
+#define ERR_VARIABLE_REDECLARED 2
+#define	ERR_UNSUPORTED_TYPE 3
 
 char buffer[100];
 
 static int constant_counter = 0;
 static int temp_counter = 0;
+static int variable_counter = 0;
 
 Stack * operand_stack;
 Stack * operator_stack;
+
+Stack * command_operator_stack;
+Stack * command_operand_stack;
 
 void dummy_semantic_action(Token * token) {
 	// DOES NOTHING
@@ -37,11 +46,120 @@ char * get_constant_label() {
 		sprintf(constant->label, "K%d", constant_counter);
 		constant_counter++;
 
-		sprintf(buffer, "%s\t\tK  =%d\t\t; Declaracao de constante\n", constant->label, token->value);
+		sprintf(buffer, "%s\t\t\tK  =%d\t\t; Declaracao de constante\n", constant->label, token->value);
 		write_to_data(buffer);
 	}
 	return constant->label;
 }
+
+char * get_temp_label() {
+	char * temp = (char *)malloc(10*sizeof(char));
+	sprintf(temp, "T%d", temp_counter);
+	temp_counter++;
+
+	sprintf(buffer, "%s\t\t\tK  =%d\t\t; Declaracao de temporario\n", temp, 0);
+	write_to_data(buffer);
+	return temp;
+}
+
+char * get_variable_label() {
+	char * var = (char *)malloc(10*sizeof(char));
+	sprintf(var, "V%d", variable_counter);
+	variable_counter++;
+
+	sprintf(buffer, "%s\t\t\tK  =%d\t\t; Declaracao de variavel\n", var, 0);
+	write_to_data(buffer);
+	return var;
+}
+
+/***********************************************************/
+/* 					PROGRAM ACTIONS						   */
+/***********************************************************/
+
+void print_main(Token *token) {
+	sprintf(buffer, "main\t\tJP  /0000\t\t;\n");
+	write_to_code(buffer);
+}
+
+void end_program(Token *token) {
+	sprintf(buffer, "\t\t\tHM  /00\t\t;\n");
+	write_to_code(buffer);
+	sprintf(buffer, "\t\t\t#  P \t\t;\n\n");
+	write_to_code(buffer);
+}
+
+void declare_variable(Token *token) {
+	Node *identifier = get_identifier_for_data_on_current_table(token->lexeme);
+	if(identifier->wasDeclared) {
+		char err[200];
+		sprintf(err, "redeclaration of variable \"%s\" in same scope", token->lexeme);
+		throw_semantic_exception(ERR_VARIABLE_REDECLARED, err);
+	} else {
+		identifier->wasDeclared = 1;
+	}
+}
+
+void throw_boolean_exception(Token *token) {
+	throw_semantic_exception(ERR_UNSUPORTED_TYPE, "boolean type is currently unsupported by the compiler");
+}
+
+/***********************************************************/
+/* 					COMMAND ACTIONS						   */
+/***********************************************************/
+
+void push_command(Token *token) {
+	stack_push(command_operator_stack, token->lexeme);
+}
+
+void push_command_operand(Token *token) {
+	Node *variable = get_identifier_for_data(token->lexeme);
+	if(variable->wasDeclared) {
+		if(variable->label == NULL)
+			variable->label = get_variable_label();
+		stack_push(command_operand_stack, variable->label);
+	} else {
+		char err[200];
+		sprintf(err, "trying to use undeclared variable \"%s\"", variable->data);
+		throw_semantic_exception(ERR_VARIABLE_REDECLARED, err);
+	}
+}
+
+void execute_output() {
+	sprintf(buffer, "\t\t\tLD  %s\t\t\t\t; Comando de output\n", stack_pop(command_operand_stack));
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tMM  output_number\t;\n");
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tSC  output\t\t\t;\n");
+	write_to_code(buffer);
+}
+
+void execute_input() {
+	sprintf(buffer, "\t\t\tSC  input\t\t; Comando de input\n");
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tMM  %s\t\t;\n", stack_pop(command_operand_stack));
+	write_to_code(buffer);
+}
+
+void execute_assign() {
+	sprintf(buffer, "\t\t\tMM  %s\t\t; Variable assign\n", stack_pop(command_operand_stack));
+	write_to_code(buffer);
+}
+
+void resolve_command(Token *token) {
+	char * command = stack_pop(command_operator_stack);
+
+	if(strcmp(command, "=") == 0) execute_assign();
+	else if(strcmp(command, "output") == 0) execute_output();
+	else if(strcmp(command, "input") == 0) execute_input();
+}
+
+
+/***********************************************************/
+/* 					EXPRESSION	ACTIONS					   */
+/***********************************************************/
 
 int operator_precedence(char * operator) {
 	if(operator != NULL) {
@@ -60,10 +178,6 @@ char * get_mvn_operator(char * operator) {
 	/*if(strcmp(operator, "/") == 0)*/ return "/ ";
 }
 
-/***********************************************************/
-/* 					EXPRESSION	ACTIONS					   */
-/***********************************************************/
-
 // Called in the end of an expression
 //  X o Y
 // o is the top of the operator stack (or LD, if stack is empty)
@@ -80,12 +194,7 @@ void resolve_expression() {
 	sprintf(buffer, "\t\t\t%s  %s\t\t;\n", o, Y);
 	write_to_code(buffer);
 
-	char * temp = (char *)malloc(10*sizeof(char));
-	sprintf(temp, "T%d", temp_counter);
-	temp_counter++;
-
-	sprintf(buffer, "%s\t\t\tK  =%d\t\t; Declaracao de temporario\n", temp, 0);
-	write_to_data(buffer);
+	char * temp = get_temp_label();
 	sprintf(buffer, "\t\t\tMM  %s\t\t;\n", temp);
 	write_to_code(buffer);
 
@@ -115,7 +224,16 @@ void push_operator(Token *token) {
 }
 
 void push_identifier(Token *token) {
-
+	Node *identifier = get_identifier_for_data(token->lexeme);
+	if(identifier->wasDeclared) {
+		if(identifier->label == NULL)
+			identifier->label = get_variable_label();
+		stack_push(operand_stack, identifier->label);
+	} else {
+		char err[200];
+		sprintf(err, "trying to use undeclared variable \"%s\"", token->lexeme);
+		throw_semantic_exception(ERR_VARIABLE_REDECLARED, err);
+	}
 }
 
 void expression_end(Token *token) {
@@ -125,26 +243,13 @@ void expression_end(Token *token) {
 	}
 }
 
-/***********************************************************/
-/* 					PROGRAM ACTIONS						   */
-/***********************************************************/
-
-void print_main(Token *token) {
-	sprintf(buffer, "main\t\tJP  /0000\t\t;\n");
-	write_to_code(buffer);
-}
-
-void end_program(Token *token) {
-	sprintf(buffer, "\t\t\tHM  /00\t\t;\n");
-	write_to_code(buffer);
-	sprintf(buffer, "\t\t\t#  P \t\t;\n\n");
-	write_to_code(buffer);
-}
-
 void init_semantic_actions() {
 
 	operand_stack = empty_stack();
 	operator_stack = empty_stack();
+
+	command_operand_stack = empty_stack();
+	command_operator_stack = empty_stack();
 
 	int i, j, k = 0;
 
@@ -175,10 +280,10 @@ void init_semantic_actions() {
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][3][MTTYPE_STRUCT] = 35;
 //	actions_on_state_transition[MTYPE_PROGRAM][3][MTTYPE_INT] = 36;
-//	actions_on_state_transition[MTYPE_PROGRAM][3][MTTYPE_BOOLEAN] = 36;
+	actions_on_state_transition[MTYPE_PROGRAM][3][MTTYPE_BOOLEAN] = throw_boolean_exception;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][4][MTTYPE_INT] = 34;
-//	actions_on_state_transition[MTYPE_PROGRAM][4][MTTYPE_BOOLEAN] = 34;
+	actions_on_state_transition[MTYPE_PROGRAM][4][MTTYPE_BOOLEAN] = throw_boolean_exception;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][5][MTTYPE_LEFT_CURLY_BRACKET] = 7;
 //
@@ -191,7 +296,7 @@ void init_semantic_actions() {
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][9][MTTYPE_STRUCT] = 14;
 //	actions_on_state_transition[MTYPE_PROGRAM][9][MTTYPE_INT] = 15;
-//	actions_on_state_transition[MTYPE_PROGRAM][9][MTTYPE_BOOLEAN] = 15;
+	actions_on_state_transition[MTYPE_PROGRAM][9][MTTYPE_BOOLEAN] = throw_boolean_exception;
 //
 	actions_on_state_transition[MTYPE_PROGRAM][11][MTTYPE_RIGHT_CURLY_BRACKET] = end_program;
 //
@@ -200,15 +305,15 @@ void init_semantic_actions() {
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][13][MTTYPE_STRUCT] = 16;
 //	actions_on_state_transition[MTYPE_PROGRAM][13][MTTYPE_INT] = 17;
-//	actions_on_state_transition[MTYPE_PROGRAM][13][MTTYPE_BOOLEAN] = 17;
+	actions_on_state_transition[MTYPE_PROGRAM][13][MTTYPE_BOOLEAN] = throw_boolean_exception;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][14][MTTYPE_IDENTIFIER] = 28;
 //
-//	actions_on_state_transition[MTYPE_PROGRAM][15][MTTYPE_IDENTIFIER] = 18;
+	actions_on_state_transition[MTYPE_PROGRAM][15][MTTYPE_IDENTIFIER] = declare_variable;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][16][MTTYPE_IDENTIFIER] = 29;
 //
-//	actions_on_state_transition[MTYPE_PROGRAM][17][MTTYPE_IDENTIFIER] = 19;
+	actions_on_state_transition[MTYPE_PROGRAM][17][MTTYPE_IDENTIFIER] = declare_variable;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][18][MTTYPE_LEFT_SQUARE_BRACKET] = 20;
 //	actions_on_state_transition[MTYPE_PROGRAM][18][MTTYPE_COMMA] = 21;
@@ -221,12 +326,12 @@ void init_semantic_actions() {
 //	actions_on_state_transition[MTYPE_PROGRAM][20][MTTYPE_NUMBER] = 24;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][21][MTTYPE_INT] = 15;
-//	actions_on_state_transition[MTYPE_PROGRAM][21][MTTYPE_BOOLEAN] = 15;
+	actions_on_state_transition[MTYPE_PROGRAM][21][MTTYPE_BOOLEAN] = throw_boolean_exception;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][22][MTTYPE_NUMBER] = 25;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][23][MTTYPE_INT] = 17;
-//	actions_on_state_transition[MTYPE_PROGRAM][23][MTTYPE_BOOLEAN] = 17;
+	actions_on_state_transition[MTYPE_PROGRAM][23][MTTYPE_BOOLEAN] = throw_boolean_exception;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][24][MTTYPE_RIGHT_SQUARE_BRACKET] = 26;
 //
@@ -256,7 +361,7 @@ void init_semantic_actions() {
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][35][MTTYPE_IDENTIFIER] = 57;
 //
-//	actions_on_state_transition[MTYPE_PROGRAM][36][MTTYPE_IDENTIFIER] = 38;
+	actions_on_state_transition[MTYPE_PROGRAM][36][MTTYPE_IDENTIFIER] = declare_variable;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][37][MTTYPE_LEFT_PARENTHESES] = 39;
 //
@@ -265,13 +370,13 @@ void init_semantic_actions() {
 //	actions_on_state_transition[MTYPE_PROGRAM][38][MTTYPE_SEMICOLON] = 42;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][39][MTTYPE_INT] = 43;
-//	actions_on_state_transition[MTYPE_PROGRAM][39][MTTYPE_BOOLEAN] = 43;
+	actions_on_state_transition[MTYPE_PROGRAM][39][MTTYPE_BOOLEAN] = throw_boolean_exception;
 //	actions_on_state_transition[MTYPE_PROGRAM][39][MTTYPE_RIGHT_PARENTHESES] = 44;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][40][MTTYPE_NUMBER] = 49;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][41][MTTYPE_INT] = 36;
-//	actions_on_state_transition[MTYPE_PROGRAM][41][MTTYPE_BOOLEAN] = 36;
+	actions_on_state_transition[MTYPE_PROGRAM][41][MTTYPE_BOOLEAN] = throw_boolean_exception;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][42][MTTYPE_DECLARE] = 3;
 //	actions_on_state_transition[MTYPE_PROGRAM][42][MTTYPE_FUNCTION] = 4;
@@ -286,7 +391,7 @@ void init_semantic_actions() {
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][46][MTTYPE_STRUCT] = 50;
 //	actions_on_state_transition[MTYPE_PROGRAM][46][MTTYPE_INT] = 51;
-//	actions_on_state_transition[MTYPE_PROGRAM][46][MTTYPE_BOOLEAN] = 51;
+	actions_on_state_transition[MTYPE_PROGRAM][46][MTTYPE_BOOLEAN] = throw_boolean_exception;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][47][MTTYPE_FUNCTION] = 4;
 //	actions_on_state_transition[MTYPE_PROGRAM][47][MTTYPE_MAIN] = 5;
@@ -297,7 +402,7 @@ void init_semantic_actions() {
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][50][MTTYPE_IDENTIFIER] = 61;
 //
-//	actions_on_state_transition[MTYPE_PROGRAM][51][MTTYPE_IDENTIFIER] = 53;
+	actions_on_state_transition[MTYPE_PROGRAM][51][MTTYPE_IDENTIFIER] = declare_variable;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][52][MTTYPE_COMMA] = 41;
 //	actions_on_state_transition[MTYPE_PROGRAM][52][MTTYPE_SEMICOLON] = 42;
@@ -309,7 +414,7 @@ void init_semantic_actions() {
 //	actions_on_state_transition[MTYPE_PROGRAM][54][MTTYPE_NUMBER] = 56;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][55][MTTYPE_INT] = 51;
-//	actions_on_state_transition[MTYPE_PROGRAM][55][MTTYPE_BOOLEAN] = 51;
+	actions_on_state_transition[MTYPE_PROGRAM][55][MTTYPE_BOOLEAN] = throw_boolean_exception;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][56][MTTYPE_RIGHT_SQUARE_BRACKET] = 58;
 //
@@ -335,7 +440,7 @@ void init_semantic_actions() {
 //	actions_on_state_transition[MTYPE_PROGRAM][64][MTTYPE_NUMBER] = 67;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][65][MTTYPE_INT] = 43;
-//	actions_on_state_transition[MTYPE_PROGRAM][65][MTTYPE_BOOLEAN] = 43;
+	actions_on_state_transition[MTYPE_PROGRAM][65][MTTYPE_BOOLEAN] = throw_boolean_exception;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][66][MTTYPE_STRUCT] = 50;
 //
@@ -349,6 +454,70 @@ void init_semantic_actions() {
 //	actions_on_machine_transition[MTYPE_PROGRAM][11][MTYPE_COMMAND] = 11;
 //	actions_on_machine_transition[MTYPE_PROGRAM][45][MTYPE_COMMAND] = 48;
 //	actions_on_machine_transition[MTYPE_PROGRAM][48][MTYPE_COMMAND] = 48;
+
+	/***********************************************************/
+	/* 						COMMAND							   */
+	/***********************************************************/
+
+	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_IDENTIFIER] = push_command_operand;
+//	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_IF] = 2;
+//	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_WHILE] = 3;
+	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_INPUT] = push_command;
+	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_OUTPUT] = push_command;
+//	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_RETURN] = 5;
+//
+	actions_on_state_transition[MTYPE_COMMAND][1][MTTYPE_EQUAL] = push_command;
+//	actions_on_state_transition[MTYPE_COMMAND][1][MTTYPE_LEFT_SQUARE_BRACKET] = 7;
+//	actions_on_state_transition[MTYPE_COMMAND][1][MTTYPE_LEFT_PARENTHESES] = 8;
+//
+//	actions_on_state_transition[MTYPE_COMMAND][2][MTTYPE_LEFT_PARENTHESES] = 21;
+//
+//	actions_on_state_transition[MTYPE_COMMAND][3][MTTYPE_LEFT_PARENTHESES] = 15;
+//
+	actions_on_state_transition[MTYPE_COMMAND][4][MTTYPE_IDENTIFIER] = push_command_operand;
+//
+//	actions_on_state_transition[MTYPE_COMMAND][6][MTTYPE_LEFT_CURLY_BRACKET] = 18;
+//
+//	actions_on_state_transition[MTYPE_COMMAND][7][MTTYPE_NUMBER] = 13;
+//
+//	actions_on_state_transition[MTYPE_COMMAND][8][MTTYPE_RIGHT_PARENTHESES] = 9;
+//
+	actions_on_state_transition[MTYPE_COMMAND][9][MTTYPE_SEMICOLON] = resolve_command;
+//
+//	actions_on_state_transition[MTYPE_COMMAND][10][MTTYPE_COMMA] = 12;
+//	actions_on_state_transition[MTYPE_COMMAND][10][MTTYPE_RIGHT_PARENTHESES] = 9;
+//
+//	actions_on_state_transition[MTYPE_COMMAND][13][MTTYPE_RIGHT_SQUARE_BRACKET] = 14;
+//
+//	actions_on_state_transition[MTYPE_COMMAND][14][MTTYPE_EQUAL] = 5;
+//
+//	actions_on_state_transition[MTYPE_COMMAND][16][MTTYPE_RIGHT_PARENTHESES] = 17;
+//
+//	actions_on_state_transition[MTYPE_COMMAND][17][MTTYPE_LEFT_CURLY_BRACKET] = 19;
+//
+//	actions_on_state_transition[MTYPE_COMMAND][19][MTTYPE_RIGHT_CURLY_BRACKET] = 11;
+//
+//	actions_on_state_transition[MTYPE_COMMAND][20][MTTYPE_COMMA] = 18;
+//	actions_on_state_transition[MTYPE_COMMAND][20][MTTYPE_RIGHT_CURLY_BRACKET] = 9;
+//
+//	actions_on_state_transition[MTYPE_COMMAND][22][MTTYPE_RIGHT_PARENTHESES] = 23;
+//
+//	actions_on_state_transition[MTYPE_COMMAND][23][MTTYPE_LEFT_CURLY_BRACKET] = 24;
+//
+//	actions_on_state_transition[MTYPE_COMMAND][24][MTTYPE_RIGHT_CURLY_BRACKET] = 25;
+//
+//	actions_on_state_transition[MTYPE_COMMAND][25][MTTYPE_ELSE] = 17;
+//
+//	/* machine call transitions */
+//	actions_on_machine_transition[MTYPE_COMMAND][5][MTYPE_EXPRESSION] = 9;
+//	actions_on_machine_transition[MTYPE_COMMAND][6][MTYPE_EXPRESSION] = 9;
+//	actions_on_machine_transition[MTYPE_COMMAND][8][MTYPE_EXPRESSION] = 10;
+//	actions_on_machine_transition[MTYPE_COMMAND][12][MTYPE_EXPRESSION] = 10;
+//	actions_on_machine_transition[MTYPE_COMMAND][15][MTYPE_EXPRESSION] = 16;
+//	actions_on_machine_transition[MTYPE_COMMAND][18][MTYPE_EXPRESSION] = 20;
+//	actions_on_machine_transition[MTYPE_COMMAND][19][MTYPE_COMMAND] = 19;
+//	actions_on_machine_transition[MTYPE_COMMAND][21][MTYPE_EXPRESSION] = 22;
+//	actions_on_machine_transition[MTYPE_COMMAND][24][MTYPE_COMMAND] = 24;
 
 	/***********************************************************/
 	/* 						EXPRESSION						   */

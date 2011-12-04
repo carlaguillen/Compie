@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
 	while (token->type != TTYPE_END_OF_FILE) {
 		if (token->type != TTYPE_COMMENT && token->type != TTYPE_STRING)
 			if (!spa_step()) { /* sintatic analyser */
-				fprintf(stderr, "Source code would not be correctly parsed;");
+				fprintf(stderr, "source code could not be correctly parsed");
 				break;
 			}
 		get_next_token(); /* lexical analyser */

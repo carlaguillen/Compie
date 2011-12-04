@@ -94,6 +94,11 @@ Node * get_identifier_for_data(char * data) {
 		return get_identifier_for_data_on_all_tables(data, identifiers_table);
 }
 
+Node * get_identifier_for_data_on_current_table(char * data) {
+	if(search_list(data, identifiers_table) == INDEX_NOT_FOUND) return NULL;
+	return get_node_at_index(search_identifiers_table(data), identifiers_table);
+}
+
 
 int search_constants_table(char * data) {
 	if (constants_table == NULL) constants_table =  empty_list();

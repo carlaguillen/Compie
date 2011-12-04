@@ -13,6 +13,7 @@
 
 #include "spa.h"
 #include "semantic.h"
+#include "file_reader.h"
 
 /***********************************************************/
 /* 						PRIVATE							   */
@@ -36,7 +37,7 @@ int spa_convert_token_to_machine_type() {
 			if ( strcmp(token->lexeme, "if")		== 0 ) 			return MTTYPE_IF;
 			if ( strcmp(token->lexeme, "else")		== 0 )			return MTTYPE_ELSE;
 			if ( strcmp(token->lexeme, "while")		== 0 )			return MTTYPE_WHILE;
-			if ( strcmp(token->lexeme, "input")		== 0 )			return MTTYPE_INPOUT;
+			if ( strcmp(token->lexeme, "input")		== 0 )			return MTTYPE_INPUT;
 			if ( strcmp(token->lexeme, "output")	== 0 )			return MTTYPE_OUTPUT;
 			if ( strcmp(token->lexeme, "true")		== 0 )			return MTTYPE_TRUE;
 			if ( strcmp(token->lexeme, "false")		== 0 ) 			return MTTYPE_FALSE;
@@ -151,10 +152,19 @@ void spa_init() {
 	init_semantic_actions();
 }
 
+static int halt = 0;
+
 int spa_step() {
+	if(halt) return 0;
+
 	int machine_token_type = spa_convert_token_to_machine_type();
 
 	if (machine_token_type == MTTYPE_INVALID) return 0;
 
 	return transition_current_machine_with_token(machine_token_type);
+}
+
+void throw_semantic_exception(int code, char * err) {
+	fprintf(stderr, "@semantic - exception code-%d: %s\n", code, err);
+	halt = 1;
 }

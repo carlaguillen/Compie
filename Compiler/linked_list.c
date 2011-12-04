@@ -23,6 +23,7 @@ Node * createnode(char * data){
   Node * newNode = malloc(sizeof(Node));
   newNode->data = data;
   newNode->label = NULL;
+  newNode->wasDeclared = 0;
   newNode->next = NULL;
   return newNode;
 }

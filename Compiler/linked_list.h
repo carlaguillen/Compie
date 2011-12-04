@@ -36,6 +36,7 @@
 typedef struct node {
   char * data;
   char * label;
+  int	wasDeclared;
   struct node * next;
 } Node;
 

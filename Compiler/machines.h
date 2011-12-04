@@ -44,7 +44,7 @@
 #define MTTYPE_IF  					9		/* if */
 #define MTTYPE_ELSE 				10		/* else */
 #define MTTYPE_WHILE 				11		/* while */
-#define MTTYPE_INPOUT 				12		/* input */
+#define MTTYPE_INPUT 				12		/* input */
 #define MTTYPE_OUTPUT 				13		/* output */
 #define MTTYPE_TRUE 				14		/* true */
 #define MTTYPE_FALSE 				15		/* false */

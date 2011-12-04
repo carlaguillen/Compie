@@ -23,11 +23,11 @@ void init_file_reader(char *path) {
 }
 
 char get_next_char() {
-	return (char) fgetc(file);
+	return (char)fgetc(file);
 } 
 
 char get_look_ahead() {
 	int c = fgetc(file);
 	ungetc(c, file);
 	return (char)c;
-} 
+}

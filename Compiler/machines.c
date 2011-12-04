@@ -249,7 +249,7 @@ void init_machines() {
 	command.transition_table[0][MTTYPE_IDENTIFIER] = 1;
 	command.transition_table[0][MTTYPE_IF] = 2;
 	command.transition_table[0][MTTYPE_WHILE] = 3;
-	command.transition_table[0][MTTYPE_INPOUT] = 4;
+	command.transition_table[0][MTTYPE_INPUT] = 4;
 	command.transition_table[0][MTTYPE_OUTPUT] = 4;
 	command.transition_table[0][MTTYPE_RETURN] = 5;
 

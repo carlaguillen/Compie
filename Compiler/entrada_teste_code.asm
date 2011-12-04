@@ -1,5 +1,5 @@
 		@ /0000 ;
-programa		SC	main;
+programa		SC	main	;
 zero			K	=0		;
 one				K	=1		;
 ten				K 	=10		;
@@ -128,12 +128,13 @@ i_return	LD	input_number		;
 			RS	input				;
 
 main		JP  /0000		;
-			LD  K1		;
-			/   K2		;
-			MM  T0		;
 			LD  K0		;
-			-   T0		;
-			MM  T1		;
+			+   K1		;
+			MM  T0		;
+			MM  V0		; Variable assign
+			LD  V0				; Comando de output
+			MM  output_number	;
+			SC  output			;
 			HM  /00		;
 			#  P 		;
 
