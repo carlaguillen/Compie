@@ -128,40 +128,28 @@ i_return	LD	input_number		;
 			RS	input				;
 
 main		JP  /0000		;
-			SC  input		; Comando de input
-			MM  V0		;
-			SC  input		; Comando de input
-			MM  V1		;
-L0			LD  zero	; Begin while loop
+I0			LD  zero	; Begin if case
 			LD  V0		;
-			JN  _L0		;
-			JZ  _L0		;
+			JN  _I0		;
+			JZ  _I0		;
 			LD  V0				; Comando de output
 			MM  output_number	;
 			SC  output			;
-			LD  V0		;
-			-   K0		;
-			MM  T0		;
-			LD  T0		;
-			LD  T0		;
-			MM  V0		; Variable assign
-L1			LD  zero	; Begin while loop
+			JP  E0		;
+_I0			LD  zero	; End if case/Begin else case
+I1			LD  zero	; Begin if case
 			LD  V1		;
-			JN  _L1		;
-			JZ  _L1		;
+			JN  _I1		;
+			JZ  _I1		;
 			LD  V1				; Comando de output
 			MM  output_number	;
 			SC  output			;
-			LD  V1		;
-			-   K0		;
-			MM  T1		;
-			LD  T1		;
-			LD  T1		;
-			MM  V1		; Variable assign
-			JP  L1		;
-_L1			LD  zero	; End while loop
-			JP  L0		;
-_L0			LD  zero	; End while loop
+			JP  E1		;
+_I1			LD  zero	; End if case/Begin else case
+			SC  input	; Comando de input
+			MM  V0		;
+E1			LD  zero	; End else case
+E0			LD  zero	; End else case
 			HM  /00		;
 			#  P 		;
 

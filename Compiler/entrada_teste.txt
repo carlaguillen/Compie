@@ -3,14 +3,13 @@ program
 main {
 	declare int a;
 	declare int b;
-	input a;
-	input b;
-	while (a) {
+	if (a) {
 		output a;
-		a = a - 1;
-		while (b) {
+	} else {
+		if (b) {
 			output b;
-			b = b - 1; 
+		} else {
+			input a;	
 		}
 	}
 }

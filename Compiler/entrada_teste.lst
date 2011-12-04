@@ -134,8 +134,8 @@
 00f4 9602		;				MM  V1		;
 00f6 8002		;	L0			LD  zero	; Begin while loop
 00f8 8600		;				LD  V0		;
-00fa 2130		;				JN  _L0		;
-00fc 1130		;				JZ  _L0		;
+00fa 212e		;				JN  _L0		;
+00fc 112e		;				JZ  _L0		;
 00fe 8600		;				LD  V0				; Comando de output
 0100 9014		;				MM  output_number	;
 0102 a01a		;				SC  output			;
@@ -145,10 +145,10 @@
 010a 8606		;				LD  T0		;
 010c 8606		;				LD  T0		;
 010e 9600		;				MM  V0		; Variable assign
-0110 8002		;	L1			LD  zero	; Begin while loop
+0110 8002		;	I0			LD  zero	; Begin if case
 0112 8602		;				LD  V1		;
-0114 212c		;				JN  _L1		;
-0116 112c		;				JZ  _L1		;
+0114 212a		;				JN  _I0		;
+0116 112a		;				JZ  _I0		;
 0118 8602		;				LD  V1				; Comando de output
 011a 9014		;				MM  output_number	;
 011c a01a		;				SC  output			;
@@ -158,11 +158,10 @@
 0124 8608		;				LD  T1		;
 0126 8608		;				LD  T1		;
 0128 9602		;				MM  V1		; Variable assign
-012a 0110		;				JP  L1		;
-012c 8002		;	_L1			LD  zero	; End while loop
-012e 00f6		;				JP  L0		;
-0130 8002		;	_L0			LD  zero	; End while loop
-0132 c000		;				HM  /00		;
+012a 8002		;	_I0			LD  zero	; End if case
+012c 00f6		;				JP  L0		;
+012e 8002		;	_L0			LD  zero	; End while loop
+0130 c000		;				HM  /00		;
 
 				;			 @ /0600
 0600 0000		;	V0			K  =0		; Declaracao de variavel

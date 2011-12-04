@@ -28,7 +28,8 @@ static int constant_counter 	= 0;
 static int temp_counter 		= 0;
 static int variable_counter 	= 0;
 static int loop_counter 		= 0;
-
+static int if_counter			= 0;
+static int else_counter			= 0;
 
 Stack * operand_stack;
 Stack * operator_stack;
@@ -82,6 +83,22 @@ char * get_loop_label() {
 	return loop;
 }
 
+char * get_if_label() {
+	char * iff = (char *)malloc(10*sizeof(char));
+	sprintf(iff, "I%d", if_counter);
+	if_counter++;
+
+	return iff;
+}
+
+char * get_else_label() {
+	char * elsee = (char *)malloc(10*sizeof(char));
+	sprintf(elsee, "E%d", else_counter);
+	else_counter++;
+
+	return elsee;
+}
+
 /***********************************************************/
 /* 					PROGRAM ACTIONS						   */
 /***********************************************************/
@@ -125,6 +142,12 @@ void push_control_command(Token *token) {
 		label = get_loop_label();
 		sprintf(buffer, "%s\t\t\tLD  zero\t; Begin while loop\n", label);
 		write_to_code(buffer);
+	} else if (strcmp(command, "if") == 0) {
+		label = get_if_label();
+		sprintf(buffer, "%s\t\t\tLD  zero\t; Begin if case\n", label);
+		write_to_code(buffer);
+	} else if (strcmp(command, "else") == 0) {
+		label = get_else_label();
 	}
 
 	stack_push(command_operator_stack, command);
@@ -160,7 +183,7 @@ void resolve_output() {
 }
 
 void resolve_input() {
-	sprintf(buffer, "\t\t\tSC  input\t\t; Comando de input\n");
+	sprintf(buffer, "\t\t\tSC  input\t; Comando de input\n");
 	write_to_code(buffer);
 
 	sprintf(buffer, "\t\t\tMM  %s\t\t;\n", stack_pop(command_operand_stack));
@@ -193,7 +216,52 @@ void resolve_end_while() {
 
 	sprintf(buffer, "_%s\t\t\tLD  zero\t; End while loop\n", label);
 	write_to_code(buffer);
+
 	exit_current_scope();
+}
+
+void resolve_if() {
+	char * label = stack_check(command_operand_stack);
+
+	sprintf(buffer, "\t\t\tJN  _%s\t\t;\n", label);
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tJZ  _%s\t\t;\n", label);
+	write_to_code(buffer);
+
+	stack_push(command_operator_stack, "endif");
+	enter_new_scope();
+}
+
+void resolve_end_if() {
+	char * label = stack_pop(command_operand_stack);
+
+	sprintf(buffer, "_%s\t\t\tLD  zero\t; End if case\n", label);
+	write_to_code(buffer);
+
+	exit_current_scope();
+}
+
+void resolve_else() {
+	char * else_label = stack_pop(command_operand_stack);
+	char * end_if_label = stack_pop(command_operand_stack);
+	stack_pop(command_operator_stack);
+
+	sprintf(buffer, "\t\t\tJP  %s\t\t;\n", else_label);
+	write_to_code(buffer);
+
+	sprintf(buffer, "_%s\t\t\tLD  zero\t; End if case/Begin else case\n", end_if_label);
+	write_to_code(buffer);
+
+	stack_push(command_operand_stack, else_label);
+	stack_push(command_operator_stack, "endelse");
+}
+
+void resolve_end_else() {
+	char * label = stack_pop(command_operand_stack);
+
+	sprintf(buffer, "%s\t\t\tLD  zero\t; End else case\n", label);
+	write_to_code(buffer);
 }
 
 void resolve_command(Token *token) {
@@ -204,6 +272,10 @@ void resolve_command(Token *token) {
 	else if(strcmp(command, "input") == 0) resolve_input();
 	else if(strcmp(command, "while") == 0) resolve_while();
 	else if(strcmp(command, "endwhile") == 0) resolve_end_while();
+	else if(strcmp(command, "if") == 0) resolve_if();
+	else if(strcmp(command, "endif") == 0) resolve_end_if();
+	else if(strcmp(command, "else") == 0) resolve_else();
+	else if(strcmp(command, "endelse") == 0) resolve_end_else();
 }
 
 
@@ -513,7 +585,7 @@ void init_semantic_actions() {
 	/***********************************************************/
 
 	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_IDENTIFIER] = push_command_operand;
-//	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_IF] = 2;
+	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_IF] = push_control_command;
 	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_WHILE] = push_control_command;
 	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_INPUT] = push_command;
 	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_OUTPUT] = push_command;
@@ -554,12 +626,12 @@ void init_semantic_actions() {
 //	actions_on_state_transition[MTYPE_COMMAND][20][MTTYPE_RIGHT_CURLY_BRACKET] = 9;
 //
 //	actions_on_state_transition[MTYPE_COMMAND][22][MTTYPE_RIGHT_PARENTHESES] = 23;
-//
-//	actions_on_state_transition[MTYPE_COMMAND][23][MTTYPE_LEFT_CURLY_BRACKET] = 24;
-//
+
+	actions_on_state_transition[MTYPE_COMMAND][23][MTTYPE_LEFT_CURLY_BRACKET] = resolve_command;
+
 //	actions_on_state_transition[MTYPE_COMMAND][24][MTTYPE_RIGHT_CURLY_BRACKET] = 25;
 //
-//	actions_on_state_transition[MTYPE_COMMAND][25][MTTYPE_ELSE] = 17;
+	actions_on_state_transition[MTYPE_COMMAND][25][MTTYPE_ELSE] = push_control_command;
 //
 //	actions_on_machine_transition[MTYPE_COMMAND][5][MTYPE_EXPRESSION] = 9;
 //	actions_on_machine_transition[MTYPE_COMMAND][6][MTYPE_EXPRESSION] = 9;
@@ -572,6 +644,7 @@ void init_semantic_actions() {
 //	actions_on_machine_transition[MTYPE_COMMAND][24][MTYPE_COMMAND] = 24;
 
 	actions_on_machine_return[MTYPE_COMMAND][11] = resolve_command;
+	actions_on_machine_return[MTYPE_COMMAND][25] = resolve_command;
 
 	/***********************************************************/
 	/* 						EXPRESSION						   */
