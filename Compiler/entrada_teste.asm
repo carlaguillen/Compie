@@ -128,18 +128,46 @@ i_return	LD	input_number		;
 			RS	input				;
 
 main		JP  /0000		;
-			LD  K0		;
-			+   K1		;
-			MM  T0		;
-			MM  V0		; Variable assign
+			SC  input		; Comando de input
+			MM  V0		;
+			SC  input		; Comando de input
+			MM  V1		;
+L0			LD  zero	; Begin while loop
+			LD  V0		;
+			JN  _L0		;
+			JZ  _L0		;
 			LD  V0				; Comando de output
 			MM  output_number	;
 			SC  output			;
+			LD  V0		;
+			-   K0		;
+			MM  T0		;
+			LD  T0		;
+			LD  T0		;
+			MM  V0		; Variable assign
+L1			LD  zero	; Begin while loop
+			LD  V1		;
+			JN  _L1		;
+			JZ  _L1		;
+			LD  V1				; Comando de output
+			MM  output_number	;
+			SC  output			;
+			LD  V1		;
+			-   K0		;
+			MM  T1		;
+			LD  T1		;
+			LD  T1		;
+			MM  V1		; Variable assign
+			JP  L1		;
+_L1			LD  zero	; End while loop
+			JP  L0		;
+_L0			LD  zero	; End while loop
 			HM  /00		;
 			#  P 		;
 
 		 @ /0600
 V0			K  =0		; Declaracao de variavel
-K0			K  =2		; Declaracao de constante
-K1			K  =3		; Declaracao de constante
+V1			K  =0		; Declaracao de variavel
+K0			K  =1		; Declaracao de constante
 T0			K  =0		; Declaracao de temporario
+T1			K  =0		; Declaracao de temporario

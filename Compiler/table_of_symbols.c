@@ -51,13 +51,13 @@ int search_special_characters_table(char * data) {
 	return INDEX_NOT_FOUND;
 }
 
-void enter_new_table_of_symbols() {
+void enter_new_scope() {
 	List *newTable = empty_list();
 	newTable->parent = identifiers_table;
 	identifiers_table = newTable;
 }
 
-void exit_current_table_of_symbols() {
+void exit_current_scope() {
 	List *current_table = identifiers_table;
 	identifiers_table = current_table->parent;
 	free(current_table);
@@ -85,8 +85,11 @@ Node * get_identifier_at_index(int index) {
 
 Node * get_identifier_for_data_on_all_tables(char * data, List * identifiers_table) {
 	if(identifiers_table == NULL) return NULL;
-	if(search_list(data, identifiers_table) != INDEX_NOT_FOUND)
-			return get_node_at_index(search_identifiers_table(data), identifiers_table);
+	int index = search_list(data, identifiers_table);
+	if(index != INDEX_NOT_FOUND) {
+			Node * identifier = get_node_at_index(index, identifiers_table);
+			if(identifier->wasDeclared) return identifier;
+	}
 	return get_identifier_for_data_on_all_tables(data, identifiers_table->parent);
 }
 

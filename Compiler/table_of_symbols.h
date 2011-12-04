@@ -29,8 +29,8 @@ extern List * constants_table;
 int search_reserved_words_table(char * data);
 int search_special_characters_table(char * data);
 
-void enter_new_table_of_symbols();
-void exit_current_table_of_symbols();
+void enter_new_scope();
+void exit_current_scope();
 int search_identifiers_table(char * data);
 int add_identifiers_table(char * data);
 int add_if_new_identifiers_table(char * data);

@@ -1,7 +1,16 @@
 program
 
 main {
-declare int a;
-	a = 2 + 3;
-	output a;
+	declare int a;
+	declare int b;
+	input a;
+	input b;
+	while (a) {
+		output a;
+		a = a - 1;
+		while (b) {
+			output b;
+			b = b - 1; 
+		}
+	}
 }

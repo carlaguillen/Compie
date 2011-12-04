@@ -24,9 +24,11 @@
 
 char buffer[100];
 
-static int constant_counter = 0;
-static int temp_counter = 0;
-static int variable_counter = 0;
+static int constant_counter 	= 0;
+static int temp_counter 		= 0;
+static int variable_counter 	= 0;
+static int loop_counter 		= 0;
+
 
 Stack * operand_stack;
 Stack * operator_stack;
@@ -72,6 +74,14 @@ char * get_variable_label() {
 	return var;
 }
 
+char * get_loop_label() {
+	char * loop = (char *)malloc(10*sizeof(char));
+	sprintf(loop, "L%d", loop_counter);
+	loop_counter++;
+
+	return loop;
+}
+
 /***********************************************************/
 /* 					PROGRAM ACTIONS						   */
 /***********************************************************/
@@ -107,6 +117,20 @@ void throw_boolean_exception(Token *token) {
 /* 					COMMAND ACTIONS						   */
 /***********************************************************/
 
+void push_control_command(Token *token) {
+	char * command = token->lexeme;
+	char * label;
+
+	if(strcmp(command, "while") == 0) {
+		label = get_loop_label();
+		sprintf(buffer, "%s\t\t\tLD  zero\t; Begin while loop\n", label);
+		write_to_code(buffer);
+	}
+
+	stack_push(command_operator_stack, command);
+	stack_push(command_operand_stack, label);
+}
+
 void push_command(Token *token) {
 	stack_push(command_operator_stack, token->lexeme);
 }
@@ -124,7 +148,7 @@ void push_command_operand(Token *token) {
 	}
 }
 
-void execute_output() {
+void resolve_output() {
 	sprintf(buffer, "\t\t\tLD  %s\t\t\t\t; Comando de output\n", stack_pop(command_operand_stack));
 	write_to_code(buffer);
 
@@ -135,7 +159,7 @@ void execute_output() {
 	write_to_code(buffer);
 }
 
-void execute_input() {
+void resolve_input() {
 	sprintf(buffer, "\t\t\tSC  input\t\t; Comando de input\n");
 	write_to_code(buffer);
 
@@ -143,17 +167,43 @@ void execute_input() {
 	write_to_code(buffer);
 }
 
-void execute_assign() {
+void resolve_assign() {
 	sprintf(buffer, "\t\t\tMM  %s\t\t; Variable assign\n", stack_pop(command_operand_stack));
 	write_to_code(buffer);
+}
+
+void resolve_while() {
+	char * label = stack_check(command_operand_stack);
+
+	sprintf(buffer, "\t\t\tJN  _%s\t\t;\n", label);
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tJZ  _%s\t\t;\n", label);
+	write_to_code(buffer);
+
+	stack_push(command_operator_stack, "endwhile");
+	enter_new_scope();
+}
+
+void resolve_end_while() {
+	char * label = stack_pop(command_operand_stack);
+
+	sprintf(buffer, "\t\t\tJP  %s\t\t;\n", label);
+	write_to_code(buffer);
+
+	sprintf(buffer, "_%s\t\t\tLD  zero\t; End while loop\n", label);
+	write_to_code(buffer);
+	exit_current_scope();
 }
 
 void resolve_command(Token *token) {
 	char * command = stack_pop(command_operator_stack);
 
-	if(strcmp(command, "=") == 0) execute_assign();
-	else if(strcmp(command, "output") == 0) execute_output();
-	else if(strcmp(command, "input") == 0) execute_input();
+	if(strcmp(command, "=") == 0) resolve_assign();
+	else if(strcmp(command, "output") == 0) resolve_output();
+	else if(strcmp(command, "input") == 0) resolve_input();
+	else if(strcmp(command, "while") == 0) resolve_while();
+	else if(strcmp(command, "endwhile") == 0) resolve_end_while();
 }
 
 
@@ -240,6 +290,9 @@ void expression_end(Token *token) {
 	if(!stack_is_empty(operator_stack)) {
 		resolve_expression();
 		expression_end(token);
+	} else if(!stack_is_empty(operand_stack)) {
+		sprintf(buffer, "\t\t\tLD  %s\t\t;\n", stack_check(operand_stack));
+		write_to_code(buffer);
 	}
 }
 
@@ -461,7 +514,7 @@ void init_semantic_actions() {
 
 	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_IDENTIFIER] = push_command_operand;
 //	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_IF] = 2;
-//	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_WHILE] = 3;
+	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_WHILE] = push_control_command;
 	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_INPUT] = push_command;
 	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_OUTPUT] = push_command;
 //	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_RETURN] = 5;
@@ -482,7 +535,7 @@ void init_semantic_actions() {
 //
 //	actions_on_state_transition[MTYPE_COMMAND][8][MTTYPE_RIGHT_PARENTHESES] = 9;
 //
-	actions_on_state_transition[MTYPE_COMMAND][9][MTTYPE_SEMICOLON] = resolve_command;
+//	actions_on_state_transition[MTYPE_COMMAND][9][MTTYPE_SEMICOLON] = resolve_command;
 //
 //	actions_on_state_transition[MTYPE_COMMAND][10][MTTYPE_COMMA] = 12;
 //	actions_on_state_transition[MTYPE_COMMAND][10][MTTYPE_RIGHT_PARENTHESES] = 9;
@@ -492,9 +545,9 @@ void init_semantic_actions() {
 //	actions_on_state_transition[MTYPE_COMMAND][14][MTTYPE_EQUAL] = 5;
 //
 //	actions_on_state_transition[MTYPE_COMMAND][16][MTTYPE_RIGHT_PARENTHESES] = 17;
-//
-//	actions_on_state_transition[MTYPE_COMMAND][17][MTTYPE_LEFT_CURLY_BRACKET] = 19;
-//
+
+	actions_on_state_transition[MTYPE_COMMAND][17][MTTYPE_LEFT_CURLY_BRACKET] = resolve_command;
+
 //	actions_on_state_transition[MTYPE_COMMAND][19][MTTYPE_RIGHT_CURLY_BRACKET] = 11;
 //
 //	actions_on_state_transition[MTYPE_COMMAND][20][MTTYPE_COMMA] = 18;
@@ -508,7 +561,6 @@ void init_semantic_actions() {
 //
 //	actions_on_state_transition[MTYPE_COMMAND][25][MTTYPE_ELSE] = 17;
 //
-//	/* machine call transitions */
 //	actions_on_machine_transition[MTYPE_COMMAND][5][MTYPE_EXPRESSION] = 9;
 //	actions_on_machine_transition[MTYPE_COMMAND][6][MTYPE_EXPRESSION] = 9;
 //	actions_on_machine_transition[MTYPE_COMMAND][8][MTYPE_EXPRESSION] = 10;
@@ -518,6 +570,8 @@ void init_semantic_actions() {
 //	actions_on_machine_transition[MTYPE_COMMAND][19][MTYPE_COMMAND] = 19;
 //	actions_on_machine_transition[MTYPE_COMMAND][21][MTYPE_EXPRESSION] = 22;
 //	actions_on_machine_transition[MTYPE_COMMAND][24][MTYPE_COMMAND] = 24;
+
+	actions_on_machine_return[MTYPE_COMMAND][11] = resolve_command;
 
 	/***********************************************************/
 	/* 						EXPRESSION						   */
