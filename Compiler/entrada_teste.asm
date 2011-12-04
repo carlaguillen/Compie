@@ -2,8 +2,10 @@
 programa		SC	main	;
 zero			K	=0		;
 one				K	=1		;
+two				K	=2		;
 ten				K 	=10		;
 sixteen			K	=16		;
+STOP			K   /0FF0	;
 
 FFFF			K	/FFFF	    ; Base de representação
 
@@ -127,50 +129,97 @@ i_end		LD	i_negative			; Transforma em negativo se negativo
 i_return	LD	input_number		;
 			RS	input				;
 
-main		JP  /0000		;
+load_inst       LD  /0000				; Instrução para o acesso indireto
+store_inst		MM	/0000				; Instrução para store indireto
+pos_param       K   =0					; Posição do parâmetro da função
+                                      
+load_ra_pos  	JP  /0000               ; Ponto de entrada da subrotina
+                LD  STOP                ; Carrega topo da pilha do R.A.
+                -   two       			; Diminui um endereço na pilha do R.A.
+                -   pos_param			; Accumulador com o endereço correto
+                +   load_inst  			; Here's the magic: Cria instrução nova!
+                MM  hack				; Armazena como a PROXIMA INSTRUCAO! 
+hack			K  /0                   ; Reservado para guardar a instrução recém-montada
+                RS load_ra_pos		    ; Thanks to Débora for this piece of gold
+
+store_ra_pos	JP	/0000				;
+				LD  STOP                ; Carrega topo da pilha do R.A.
+                -   two       			; Diminui um endereço na pilha do R.A.
+                -   pos_param			; Accumulador com o endereço correto
+                +   store_inst  		; Here's the magic: Cria instrução nova!
+                MM  hack2				; Armazena como a PROXIMA INSTRUCAO! 
+hack2			K  /0                   ; Reservado para guardar a instrução recém-montada
+                RS store_ra_pos		    ;
+
+ra_tam			K   =0			;
+ra_end			K	=0400		;
+
+cria_ra			JP  /0000		;
+				LD	STOP		;
+				+	two			;
+				MM	STOP		;
+				LD	zero		;
+				MM	pos_param    ;
+				LD	ra_end		 ;
+				SC	store_ra_pos ;
+				LD  STOP		;
+				+	ra_tam		;
+				MM	STOP		;
+				RS	cria_ra		;
+
+				main		JP  /0000		;
 			SC  input	; Comando de input
 			MM  V0		;
-			SC  input	; Comando de input
+			LD  K0		; Atribuicao de variavel
 			MM  V1		;
 I0			LD  zero	; Begin if case
-			LD  V0		; Comeco do or logico
-			JZ  TL0		;
-			JN  TL0		;
-			JP  TL1		; Returns YES
-TL0			LD  V1		;
-			JZ  TL2		;
-			JN  TL2		;
-			JP  TL1		; Returns YES
-TL2			LD  zero	;
-			JP  TL3		; Returns NO
-TL1			LD one		;
-TL3			MM  T0		; Fim do or logico
+			LD  K1		; Comparacao X < Y
+			-  V0		;
+			MM  T0		;
 			LD  T0		;
 			JN  _I0		;
 			JZ  _I0		;
-			LD  V0				; Comando de output
-			MM  output_number	;
-			SC  output			;
+			LD  V1		;
+			-   K2		;
+			MM  T1		;
+			LD  T1		; Atribuicao de variavel
+			MM  V1		;
+			JP  E0		;
+_I0			LD  zero	; End if case/Begin else case
+L0			LD  zero	; Begin while loop
+			LD  V0		; Comparacao X > Y
+			-   K1		;
+			MM  T2		;
+			LD  T2		;
+			JN  _L0		;
+			JZ  _L0		;
+			LD  V1		;
+			*   V0		;
+			MM  T3		;
+			LD  T3		; Atribuicao de variavel
+			MM  V1		;
+			LD  V0		;
+			-   K0		;
+			MM  T4		;
+			LD  T4		; Atribuicao de variavel
+			MM  V0		;
+			JP  L0		;
+_L0			LD  zero	; End while loop
+E0			LD  zero	; End else case
 			LD  V1				; Comando de output
 			MM  output_number	;
 			SC  output			;
-			JP  E0		;
-_I0			LD  zero	; End if case/Begin else case
-			LD  K0		;
-			+   K0		;
-			MM  T1		;
-			LD  T1		; Atribuicao de variavel
-			MM  V0		;
-			LD  V0				; Comando de output
-			MM  output_number	;
-			SC  output			;
-E0			LD  zero	; End else case
 			HM  /00		;
 			#  P 		;
 
 		 @ /0A00
 V0			K  =0		; Declaracao de variavel
 V1			K  =0		; Declaracao de variavel
+K0			K  =1		; Declaracao de constante
+K1			K  =0		; Declaracao de constante
 T0			K  =0		; Declaracao de temporario
-K0			K  =2		; Declaracao de constante
+K2			K  =2		; Declaracao de constante
 T1			K  =0		; Declaracao de temporario
+T2			K  =0		; Declaracao de temporario
+T3			K  =0		; Declaracao de temporario
+T4			K  =0		; Declaracao de temporario

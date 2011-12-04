@@ -1,0 +1,49 @@
+				;			@ /0000 ;
+0000 a032		;	programa		SC	cria_ra ;
+0002 0000		;	zero			K	=0		;
+0004 0002		;	two				K	=2		;
+0006 0ff0		;	STOP			K  /0FF0	;
+
+0008 8000		;	load_inst       LD  /0000				; Instrução para o acesso indireto
+000a 9000		;	store_inst		MM	/0000				; Instrução para store indireto
+000c 0000		;	pos_param       K   =0					; Posição do parâmetro da função
+                                      
+000e 0000		;	load_ra_pos  	JP  /0000               ; Ponto de entrada da subrotina
+0010 8006		;	                LD  STOP                ; Carrega topo da pilha do R.A.
+0012 5004		;	                -   two       			; Diminui um endereço na pilha do R.A.
+0014 500c		;	                -   pos_param			; Accumulador com o endereço correto
+0016 4008		;	                +   load_inst  			; Here's the magic: Cria instrução nova!
+0018 901a		;	                MM  hack				; Armazena como a PROXIMA INSTRUCAO! 
+001a 0000		;	hack			K  /0                   ; Reservado para guardar a instrução recém-montada
+001c b00e		;	                RS load_ra_pos		    ; Thanks to Débora for this piece of gold
+
+001e 0000		;	store_ra_pos	JP	/0000				;
+0020 8006		;					LD  STOP                ; Carrega topo da pilha do R.A.
+0022 5004		;	                -   two       			; Diminui um endereço na pilha do R.A.
+0024 500c		;	                -   pos_param			; Accumulador com o endereço correto
+0026 400a		;	                +   store_inst  		; Here's the magic: Cria instrução nova!
+0028 902a		;	                MM  hack2				; Armazena como a PROXIMA INSTRUCAO! 
+002a 0000		;	hack2			K  /0                   ; Reservado para guardar a instrução recém-montada
+002c b01e		;	                RS store_ra_pos		    ;
+
+002e 0000		;	ra_tam			K   =0		;
+0030 0190		;	ra_end			K	=0400	;
+
+0032 0000		;	cria_ra			JP  /0000	;
+0034 8006		;					LD	STOP	;
+0036 4004		;					+	two		;
+0038 9006		;					MM	STOP	;
+003a 8002		;					LD	zero	;
+003c 900c		;					MM	pos_param    ;
+003e a00e		;					SC	load_ra_pos  ;
+0040 4004		;					+   two			 ;
+0042 c000		;					HM	/00	 ;
+
+				;			@ /0FF0
+
+0ff0 0101		;			K	/0101	;
+
+				;			@ /0C00
+
+0c00 0000		;	T0		K =0
+				

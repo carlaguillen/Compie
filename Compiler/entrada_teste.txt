@@ -1,15 +1,17 @@
 program
 
 main {
-	declare int a;
-	declare int b;
-	input a;
-	input b;
-	if (a or b) {
-		output a;
-		output b;
+	declare int num;
+	declare int fat;
+	input num;
+	fat = 1;
+	if (num < 0) {
+		fat = fat - 2;
 	} else {
-		a = 2+2;
-		output a;
+		while (num > 0) {
+			fat = fat * num;
+			num = num - 1;
+		}	
 	}
+	output fat;
 }

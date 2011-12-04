@@ -2,8 +2,10 @@
 programa		SC	main	;
 zero			K	=0		;
 one				K	=1		;
+two				K	=2		;
 ten				K 	=10		;
 sixteen			K	=16		;
+STOP			K   /0FF0	;
 
 FFFF			K	/FFFF	    ; Base de representação
 
@@ -127,3 +129,42 @@ i_end		LD	i_negative			; Transforma em negativo se negativo
 i_return	LD	input_number		;
 			RS	input				;
 
+load_inst       LD  /0000				; Instrução para o acesso indireto
+store_inst		MM	/0000				; Instrução para store indireto
+pos_param       K   =0					; Posição do parâmetro da função
+                                      
+load_ra_pos  	JP  /0000               ; Ponto de entrada da subrotina
+                LD  STOP                ; Carrega topo da pilha do R.A.
+                -   two       			; Diminui um endereço na pilha do R.A.
+                -   pos_param			; Accumulador com o endereço correto
+                +   load_inst  			; Here's the magic: Cria instrução nova!
+                MM  hack				; Armazena como a PROXIMA INSTRUCAO! 
+hack			K  /0                   ; Reservado para guardar a instrução recém-montada
+                RS load_ra_pos		    ; Thanks to Débora for this piece of gold
+
+store_ra_pos	JP	/0000				;
+				LD  STOP                ; Carrega topo da pilha do R.A.
+                -   two       			; Diminui um endereço na pilha do R.A.
+                -   pos_param			; Accumulador com o endereço correto
+                +   store_inst  		; Here's the magic: Cria instrução nova!
+                MM  hack2				; Armazena como a PROXIMA INSTRUCAO! 
+hack2			K  /0                   ; Reservado para guardar a instrução recém-montada
+                RS store_ra_pos		    ;
+
+ra_tam			K   =0			;
+ra_end			K	=0400		;
+
+cria_ra			JP  /0000		;
+				LD	STOP		;
+				+	two			;
+				MM	STOP		;
+				LD	zero		;
+				MM	pos_param    ;
+				LD	ra_end		 ;
+				SC	store_ra_pos ;
+				LD  STOP		;
+				+	ra_tam		;
+				MM	STOP		;
+				RS	cria_ra		;
+
+				

@@ -1,175 +1,224 @@
 				;			@ /0000 ;
-0000 a0ec		;	programa		SC	main	;
+0000 a132		;	programa		SC	main	;
 0002 0000		;	zero			K	=0		;
 0004 0001		;	one				K	=1		;
-0006 000a		;	ten				K 	=10		;
-0008 0010		;	sixteen			K	=16		;
+0006 0002		;	two				K	=2		;
+0008 000a		;	ten				K 	=10		;
+000a 0010		;	sixteen			K	=16		;
+000c 0ff0		;	STOP			K   /0FF0	;
 
-000a ffff		;	FFFF			K	/FFFF	    ; Base de representação
+000e ffff		;	FFFF			K	/FFFF	    ; Base de representação
 
-000c 0030		;	ascii_offset	K	/30			; Offset para o código de um número na tabela ASCII
-000e 002d		;	ascii_minus		K	/2D			; Sinal de menos em ASCII
-0010 000d		;	ascii_cr		K	/D			; Carriage return em ASCII
-0012 000a		;	ascii_lf		K	/A			; Line feed em ASCII
-
-
-0014 0000		;	output_number	K 	=0			; Número para ser impresso
-0016 0000		;	o_temp1			K	=0			; Guarda o valor da última dezena
-0018 0001		;	o_temp2			K	=1			; Indicador da dezena
-
-001a 0000		;	output		JP	/0000				;
-001c 8006		;				LD	ten					; Inicialização
-001e 9018		;				MM	o_temp2				;
-0020 8014		;				LD	output_number		; 
-0022 2026		;				JN	o_negative			; Número negativo
-0024 0032		;				JP  o_start				; Número posítivo
-0026 800e		;	o_negative	LD	ascii_minus			; Caso contrário imprime "-"
-0028 e100		;				PD	/0100				;
-002a 800a		;				LD	FFFF				; E inverte o número
-002c 5014		;				-	output_number		;
-002e 4004		;				+	one					;
-0030 9014		;				MM	output_number		;
-0032 9016		;	o_start		MM	o_temp1				;
-0034 8014		;	o_loop		LD	output_number		; Carrega o número
-0036 7018		;				/	o_temp2				;
-0038 1044		;				JZ	o_print				; Imprime se é o número mais a esquerda.
-003a 9016		;				MM	o_temp1				; Se não, guarda o número 
-003c 8018		;				LD	o_temp2				; Aumenta a casa decimal
-003e 6006		;				*	ten					;
-0040 9018		;				MM	o_temp2				;
-0042 0034		;				JP	o_loop				; E volta para o loop
-0044 8016		;	o_print		LD	o_temp1				; Impressão do número
-0046 400c		;				+	ascii_offset		;
-0048 e100		;				PD	/0100				;
-004a 8018		;				LD	o_temp2				; Verifica se é o último número
-004c 7006		;				/	ten					;
-004e 9018		;				MM	o_temp2				;
-0050 5004		;				-	one					;
-0052 1068		;				JZ	o_end				; Vai para o final, se ímprimiu tudo
-0054 8016		;				LD	o_temp1				;
-0056 6018		;				*	o_temp2				;
-0058 9016		;				MM	o_temp1				;
-005a 8014		;				LD	output_number		; Atualiza o número para impressão
-005c 5016		;				-	o_temp1				;
-005e 9014		;				MM	output_number		;
-0060 9016		;				MM	o_temp1				;
-0062 8006		;				LD	ten					;
-0064 9018		;				MM	o_temp2				;
-0066 0034		;				JP	o_loop				; Imprime o próximo caracter
-
-0068 b01a		;	o_end		RS	output				; Final da rotina
+0010 0030		;	ascii_offset	K	/30			; Offset para o código de um número na tabela ASCII
+0012 002d		;	ascii_minus		K	/2D			; Sinal de menos em ASCII
+0014 000d		;	ascii_cr		K	/D			; Carriage return em ASCII
+0016 000a		;	ascii_lf		K	/A			; Line feed em ASCII
 
 
-006a 0000		;	input_number	K	=0				; Variável de retorno da rotina
-006c 0000		;	i_negative		K	=0				; Número digitado é negativo
-006e 0000		;	i_temp			K	=0				; Variáveis temporárias
-0070 0000		;	i_temp2			K	=0				;
+0018 0000		;	output_number	K 	=0			; Número para ser impresso
+001a 0000		;	o_temp1			K	=0			; Guarda o valor da última dezena
+001c 0001		;	o_temp2			K	=1			; Indicador da dezena
 
-0072 0000		;	input		JP	/0000				;
-0074 8002		;				LD  zero				; Inicialização
-0076 906a		;				MM	input_number		;
-0078 906c		;				MM	i_negative			;
-007a 906e		;				MM	i_temp				;
-007c 9070		;				MM	i_temp2				;
-007e d000		;				GD	/0000				; Leitura de número negativo
-0080 906e		;				MM	i_temp				; Guarda caracteres lidos em i_temp
-0082 7008		;				/	sixteen				; Obtém o primeiro caracter
-0084 7008		;				/	sixteen				; 
-0086 9070		;				MM	i_temp2				;
-0088 500e		;				-	ascii_minus			; Verifica se número digitado é negativo
-008a 108e		;				JZ	set_i_negative		;
-008c 009e		;				JP	1st_char			; Não é negativo, lê como número
-008e 8004		;	set_i_negative	LD	one				; Carrega o i_negative com FFFF
-0090 906c		;				MM	i_negative			;
-0092 00b6		;				JP	2nd_char			; Lê o segundo caracter
-0094 d000		;	i_loop		GD	/0000				; Loop de leitura
-0096 906e		;				MM	i_temp				; Guarda caracteres lidos em i_temp
-0098 7008		;				/	sixteen				; Obtém o primeiro caracter
-009a 7008		;				/	sixteen				; 
-009c 9070		;				MM	i_temp2				;
-009e 5010		;	1st_char	-	ascii_cr			; Verifica se é o fim (ascii \d ou \a)
-00a0 10de		;				JZ	i_end				; 
-00a2 8070		;				LD	i_temp2				;
-00a4 5012		;				- 	ascii_lf			;
-00a6 10de		;				JZ	i_end				;
-00a8 806a		;				LD	input_number		; Não é o último caracter
-00aa 6006		;				*	ten					; Aumenta uma dezena no resultado
-00ac 906a		;				MM	input_number		;	
-00ae 8070		;				LD	i_temp2				; Converte caracter lido em número
-00b0 500c		;				-	ascii_offset		;
-00b2 406a		;				+	input_number		; Soma no resultado de retorno
-00b4 906a		;				MM	input_number		; Atualiza o resultado de retorno
-00b6 8070		;	2nd_char	LD	i_temp2				; Obtém o segundo caracter
-00b8 6008		;				*	sixteen				;
-00ba 6008		;				*	sixteen				;
-00bc 9070		;				MM	i_temp2				;
-00be 806e		;				LD	i_temp				;
-00c0 5070		;				-	i_temp2				;
-00c2 9070		;				MM	i_temp2				;
-00c4 5010		;				-	ascii_cr			; Verifica se é o fim (ascii \d ou \a)
-00c6 10de		;				JZ	i_end				; 
-00c8 8070		;				LD	i_temp2				;
-00ca 5012		;				- 	ascii_lf			;
-00cc 10de		;				JZ	i_end				;
-00ce 806a		;				LD	input_number		; Não é o último caracter
-00d0 6006		;				*	ten					; Aumenta uma dezena no resultado
-00d2 906a		;				MM	input_number		;	
-00d4 8070		;				LD	i_temp2				; Converte caracter lido em número
-00d6 500c		;				-	ascii_offset		;
-00d8 406a		;				+	input_number		; Soma no resultado de retorno
-00da 906a		;				MM	input_number		; Atualiza o resultado de retorno
-00dc 0094		;				JP	i_loop				; Lê o proximo caracter
-00de 806c		;	i_end		LD	i_negative			; Transforma em negativo se negativo
-00e0 10e8		;				JZ  i_return			;
-00e2 8002		;				LD	zero				;
-00e4 506a		;				-	input_number		;
-00e6 906a		;				MM	input_number		;
-00e8 806a		;	i_return	LD	input_number		;
-00ea b072		;				RS	input				;
+001e 0000		;	output		JP	/0000				;
+0020 8008		;				LD	ten					; Inicialização
+0022 901c		;				MM	o_temp2				;
+0024 8018		;				LD	output_number		; 
+0026 202a		;				JN	o_negative			; Número negativo
+0028 0036		;				JP  o_start				; Número posítivo
+002a 8012		;	o_negative	LD	ascii_minus			; Caso contrário imprime "-"
+002c e100		;				PD	/0100				;
+002e 800e		;				LD	FFFF				; E inverte o número
+0030 5018		;				-	output_number		;
+0032 4004		;				+	one					;
+0034 9018		;				MM	output_number		;
+0036 901a		;	o_start		MM	o_temp1				;
+0038 8018		;	o_loop		LD	output_number		; Carrega o número
+003a 701c		;				/	o_temp2				;
+003c 1048		;				JZ	o_print				; Imprime se é o número mais a esquerda.
+003e 901a		;				MM	o_temp1				; Se não, guarda o número 
+0040 801c		;				LD	o_temp2				; Aumenta a casa decimal
+0042 6008		;				*	ten					;
+0044 901c		;				MM	o_temp2				;
+0046 0038		;				JP	o_loop				; E volta para o loop
+0048 801a		;	o_print		LD	o_temp1				; Impressão do número
+004a 4010		;				+	ascii_offset		;
+004c e100		;				PD	/0100				;
+004e 801c		;				LD	o_temp2				; Verifica se é o último número
+0050 7008		;				/	ten					;
+0052 901c		;				MM	o_temp2				;
+0054 5004		;				-	one					;
+0056 106c		;				JZ	o_end				; Vai para o final, se ímprimiu tudo
+0058 801a		;				LD	o_temp1				;
+005a 601c		;				*	o_temp2				;
+005c 901a		;				MM	o_temp1				;
+005e 8018		;				LD	output_number		; Atualiza o número para impressão
+0060 501a		;				-	o_temp1				;
+0062 9018		;				MM	output_number		;
+0064 901a		;				MM	o_temp1				;
+0066 8008		;				LD	ten					;
+0068 901c		;				MM	o_temp2				;
+006a 0038		;				JP	o_loop				; Imprime o próximo caracter
 
-00ec 0000		;	main		JP  /0000		;
-00ee a072		;				SC  input	; Comando de input
-00f0 9a00		;				MM  V0		;
-00f2 a072		;				SC  input	; Comando de input
-00f4 9a02		;				MM  V1		;
-00f6 8002		;	I0			LD  zero	; Begin if case
-00f8 8a00		;				LD  V0		; Comeco do or logico
-00fa 1100		;				JZ  TL0		;
-00fc 2100		;				JN  TL0		;
-00fe 010c		;				JP  TL1		; Returns YES
-0100 8a02		;	TL0			LD  V1		;
-0102 1108		;				JZ  TL2		;
-0104 2108		;				JN  TL2		;
-0106 010c		;				JP  TL1		; Returns YES
-0108 8002		;	TL2			LD  zero	;
-010a 010e		;				JP  TL3		; Returns NO
-010c 8004		;	TL1			LD one		;
-010e 9a04		;	TL3			MM  T0		; Fim do or logico
-0110 8a04		;				LD  T0		;
-0112 2124		;				JN  _I0		;
-0114 1124		;				JZ  _I0		;
-0116 8a00		;				LD  V0				; Comando de output
-0118 9014		;				MM  output_number	;
-011a a01a		;				SC  output			;
-011c 8a02		;				LD  V1				; Comando de output
-011e 9014		;				MM  output_number	;
-0120 a01a		;				SC  output			;
-0122 0136		;				JP  E0		;
-0124 8002		;	_I0			LD  zero	; End if case/Begin else case
-0126 8a06		;				LD  K0		;
-0128 4a06		;				+   K0		;
-012a 9a08		;				MM  T1		;
-012c 8a08		;				LD  T1		; Atribuicao de variavel
-012e 9a00		;				MM  V0		;
-0130 8a00		;				LD  V0				; Comando de output
-0132 9014		;				MM  output_number	;
-0134 a01a		;				SC  output			;
-0136 8002		;	E0			LD  zero	; End else case
-0138 c000		;				HM  /00		;
+006c b01e		;	o_end		RS	output				; Final da rotina
+
+
+006e 0000		;	input_number	K	=0				; Variável de retorno da rotina
+0070 0000		;	i_negative		K	=0				; Número digitado é negativo
+0072 0000		;	i_temp			K	=0				; Variáveis temporárias
+0074 0000		;	i_temp2			K	=0				;
+
+0076 0000		;	input		JP	/0000				;
+0078 8002		;				LD  zero				; Inicialização
+007a 906e		;				MM	input_number		;
+007c 9070		;				MM	i_negative			;
+007e 9072		;				MM	i_temp				;
+0080 9074		;				MM	i_temp2				;
+0082 d000		;				GD	/0000				; Leitura de número negativo
+0084 9072		;				MM	i_temp				; Guarda caracteres lidos em i_temp
+0086 700a		;				/	sixteen				; Obtém o primeiro caracter
+0088 700a		;				/	sixteen				; 
+008a 9074		;				MM	i_temp2				;
+008c 5012		;				-	ascii_minus			; Verifica se número digitado é negativo
+008e 1092		;				JZ	set_i_negative		;
+0090 00a2		;				JP	1st_char			; Não é negativo, lê como número
+0092 8004		;	set_i_negative	LD	one				; Carrega o i_negative com FFFF
+0094 9070		;				MM	i_negative			;
+0096 00ba		;				JP	2nd_char			; Lê o segundo caracter
+0098 d000		;	i_loop		GD	/0000				; Loop de leitura
+009a 9072		;				MM	i_temp				; Guarda caracteres lidos em i_temp
+009c 700a		;				/	sixteen				; Obtém o primeiro caracter
+009e 700a		;				/	sixteen				; 
+00a0 9074		;				MM	i_temp2				;
+00a2 5014		;	1st_char	-	ascii_cr			; Verifica se é o fim (ascii \d ou \a)
+00a4 10e2		;				JZ	i_end				; 
+00a6 8074		;				LD	i_temp2				;
+00a8 5016		;				- 	ascii_lf			;
+00aa 10e2		;				JZ	i_end				;
+00ac 806e		;				LD	input_number		; Não é o último caracter
+00ae 6008		;				*	ten					; Aumenta uma dezena no resultado
+00b0 906e		;				MM	input_number		;	
+00b2 8074		;				LD	i_temp2				; Converte caracter lido em número
+00b4 5010		;				-	ascii_offset		;
+00b6 406e		;				+	input_number		; Soma no resultado de retorno
+00b8 906e		;				MM	input_number		; Atualiza o resultado de retorno
+00ba 8074		;	2nd_char	LD	i_temp2				; Obtém o segundo caracter
+00bc 600a		;				*	sixteen				;
+00be 600a		;				*	sixteen				;
+00c0 9074		;				MM	i_temp2				;
+00c2 8072		;				LD	i_temp				;
+00c4 5074		;				-	i_temp2				;
+00c6 9074		;				MM	i_temp2				;
+00c8 5014		;				-	ascii_cr			; Verifica se é o fim (ascii \d ou \a)
+00ca 10e2		;				JZ	i_end				; 
+00cc 8074		;				LD	i_temp2				;
+00ce 5016		;				- 	ascii_lf			;
+00d0 10e2		;				JZ	i_end				;
+00d2 806e		;				LD	input_number		; Não é o último caracter
+00d4 6008		;				*	ten					; Aumenta uma dezena no resultado
+00d6 906e		;				MM	input_number		;	
+00d8 8074		;				LD	i_temp2				; Converte caracter lido em número
+00da 5010		;				-	ascii_offset		;
+00dc 406e		;				+	input_number		; Soma no resultado de retorno
+00de 906e		;				MM	input_number		; Atualiza o resultado de retorno
+00e0 0098		;				JP	i_loop				; Lê o proximo caracter
+00e2 8070		;	i_end		LD	i_negative			; Transforma em negativo se negativo
+00e4 10ec		;				JZ  i_return			;
+00e6 8002		;				LD	zero				;
+00e8 506e		;				-	input_number		;
+00ea 906e		;				MM	input_number		;
+00ec 806e		;	i_return	LD	input_number		;
+00ee b076		;				RS	input				;
+
+00f0 8000		;	load_inst       LD  /0000				; Instrução para o acesso indireto
+00f2 9000		;	store_inst		MM	/0000				; Instrução para store indireto
+00f4 0000		;	pos_param       K   =0					; Posição do parâmetro da função
+                                      
+00f6 0000		;	load_ra_pos  	JP  /0000               ; Ponto de entrada da subrotina
+00f8 800c		;	                LD  STOP                ; Carrega topo da pilha do R.A.
+00fa 5006		;	                -   two       			; Diminui um endereço na pilha do R.A.
+00fc 50f4		;	                -   pos_param			; Accumulador com o endereço correto
+00fe 40f0		;	                +   load_inst  			; Here's the magic: Cria instrução nova!
+0100 9102		;	                MM  hack				; Armazena como a PROXIMA INSTRUCAO! 
+0102 0000		;	hack			K  /0                   ; Reservado para guardar a instrução recém-montada
+0104 b0f6		;	                RS load_ra_pos		    ; Thanks to Débora for this piece of gold
+
+0106 0000		;	store_ra_pos	JP	/0000				;
+0108 800c		;					LD  STOP                ; Carrega topo da pilha do R.A.
+010a 5006		;	                -   two       			; Diminui um endereço na pilha do R.A.
+010c 50f4		;	                -   pos_param			; Accumulador com o endereço correto
+010e 40f2		;	                +   store_inst  		; Here's the magic: Cria instrução nova!
+0110 9112		;	                MM  hack2				; Armazena como a PROXIMA INSTRUCAO! 
+0112 0000		;	hack2			K  /0                   ; Reservado para guardar a instrução recém-montada
+0114 b106		;	                RS store_ra_pos		    ;
+
+0116 0000		;	ra_tam			K   =0			;
+0118 0190		;	ra_end			K	=0400		;
+
+011a 0000		;	cria_ra			JP  /0000		;
+011c 800c		;					LD	STOP		;
+011e 4006		;					+	two			;
+0120 900c		;					MM	STOP		;
+0122 8002		;					LD	zero		;
+0124 90f4		;					MM	pos_param    ;
+0126 8118		;					LD	ra_end		 ;
+0128 a106		;					SC	store_ra_pos ;
+012a 800c		;					LD  STOP		;
+012c 4116		;					+	ra_tam		;
+012e 900c		;					MM	STOP		;
+0130 b11a		;					RS	cria_ra		;
+
+0132 0000		;					main		JP  /0000		;
+0134 a076		;				SC  input	; Comando de input
+0136 9a00		;				MM  V0		;
+0138 8a04		;				LD  K0		; Atribuicao de variavel
+013a 9a02		;				MM  V1		;
+013c 8002		;	I0			LD  zero	; Begin if case
+013e 8a06		;				LD  K1		; Comparacao X < Y
+0140 5a00		;				-  V0		;
+0142 9a08		;				MM  T0		;
+0144 8a08		;				LD  T0		;
+0146 2156		;				JN  _I0		;
+0148 1156		;				JZ  _I0		;
+014a 8a02		;				LD  V1		;
+014c 5a0a		;				-   K2		;
+014e 9a0c		;				MM  T1		;
+0150 8a0c		;				LD  T1		; Atribuicao de variavel
+0152 9a02		;				MM  V1		;
+0154 017e		;				JP  E0		;
+0156 8002		;	_I0			LD  zero	; End if case/Begin else case
+0158 8002		;	L0			LD  zero	; Begin while loop
+015a 8a00		;				LD  V0		; Comparacao X > Y
+015c 5a06		;				-   K1		;
+015e 9a0e		;				MM  T2		;
+0160 8a0e		;				LD  T2		;
+0162 217c		;				JN  _L0		;
+0164 117c		;				JZ  _L0		;
+0166 8a02		;				LD  V1		;
+0168 6a00		;				*   V0		;
+016a 9a10		;				MM  T3		;
+016c 8a10		;				LD  T3		; Atribuicao de variavel
+016e 9a02		;				MM  V1		;
+0170 8a00		;				LD  V0		;
+0172 5a04		;				-   K0		;
+0174 9a12		;				MM  T4		;
+0176 8a12		;				LD  T4		; Atribuicao de variavel
+0178 9a00		;				MM  V0		;
+017a 0158		;				JP  L0		;
+017c 8002		;	_L0			LD  zero	; End while loop
+017e 8002		;	E0			LD  zero	; End else case
+0180 8a02		;				LD  V1				; Comando de output
+0182 9018		;				MM  output_number	;
+0184 a01e		;				SC  output			;
+0186 c000		;				HM  /00		;
 
 				;			 @ /0A00
 0a00 0000		;	V0			K  =0		; Declaracao de variavel
 0a02 0000		;	V1			K  =0		; Declaracao de variavel
-0a04 0000		;	T0			K  =0		; Declaracao de temporario
-0a06 0002		;	K0			K  =2		; Declaracao de constante
-0a08 0000		;	T1			K  =0		; Declaracao de temporario
+0a04 0001		;	K0			K  =1		; Declaracao de constante
+0a06 0000		;	K1			K  =0		; Declaracao de constante
+0a08 0000		;	T0			K  =0		; Declaracao de temporario
+0a0a 0002		;	K2			K  =2		; Declaracao de constante
+0a0c 0000		;	T1			K  =0		; Declaracao de temporario
+0a0e 0000		;	T2			K  =0		; Declaracao de temporario
+0a10 0000		;	T3			K  =0		; Declaracao de temporario
+0a12 0000		;	T4			K  =0		; Declaracao de temporario
