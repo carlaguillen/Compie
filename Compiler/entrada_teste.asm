@@ -129,30 +129,26 @@ i_return	LD	input_number		;
 
 main		JP  /0000		;
 I0			LD  zero	; Begin if case
-			LD  V0		;
+			LD  V0		; Comparacao X == Y
+			-  V1		;
+			JZ  T0		;
+			LD  zero	; Nao e igual
+			JP  T1		;
+T0			LD  one		; E igual
+T1			MM  T2		;
+			LD  T2		;
+			LD  T2		;
 			JN  _I0		;
 			JZ  _I0		;
-			LD  V0				; Comando de output
-			MM  output_number	;
-			SC  output			;
-			JP  E0		;
-_I0			LD  zero	; End if case/Begin else case
-I1			LD  zero	; Begin if case
 			LD  V1		;
-			JN  _I1		;
-			JZ  _I1		;
-			LD  V1				; Comando de output
-			MM  output_number	;
-			SC  output			;
-			JP  E1		;
-_I1			LD  zero	; End if case/Begin else case
-			SC  input	; Comando de input
-			MM  V0		;
-E1			LD  zero	; End else case
-E0			LD  zero	; End else case
+			MM  V0		; Variable assign
+_I0			LD  zero	; End if case
 			HM  /00		;
 			#  P 		;
 
 		 @ /0600
 V0			K  =0		; Declaracao de variavel
 V1			K  =0		; Declaracao de variavel
+T0			K  =0		; Declaracao de temporario
+T1			K  =0		; Declaracao de temporario
+T2			K  =0		; Declaracao de temporario

@@ -3,13 +3,7 @@ program
 main {
 	declare int a;
 	declare int b;
-	if (a) {
-		output a;
-	} else {
-		if (b) {
-			output b;
-		} else {
-			input a;	
-		}
+	if (a == b) {
+		a = b;
 	}
 }

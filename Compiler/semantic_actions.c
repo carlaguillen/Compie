@@ -285,10 +285,12 @@ void resolve_command(Token *token) {
 
 int operator_precedence(char * operator) {
 	if(operator != NULL) {
-		if(strcmp(operator, "+") == 0) return 0;
-		if(strcmp(operator, "-") == 0) return 0;
-		if(strcmp(operator, "*") == 0) return 1;
-		if(strcmp(operator, "/") == 0) return 1;
+		if(strcmp(operator, "+") == 0) return 1;
+		if(strcmp(operator, "-") == 0) return 1;
+		if(strcmp(operator, "*") == 0) return 2;
+		if(strcmp(operator, "/") == 0) return 2;
+		if(strcmp(operator, ">") == 0) return 0;
+		if(strcmp(operator, "<") == 0) return 0;
 	}
 	return -1;
 }
@@ -300,14 +302,78 @@ char * get_mvn_operator(char * operator) {
 	/*if(strcmp(operator, "/") == 0)*/ return "/ ";
 }
 
-// Called in the end of an expression
-//  X o Y
-// o is the top of the operator stack (or LD, if stack is empty)
+void resolve_compare_greater_than() {
+	char * Y = stack_pop(operand_stack);
+	char * X = stack_pop(operand_stack);
+
+	sprintf(buffer, "\t\t\tLD  %s\t\t; Comparacao X > Y\n", X);
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\t-   %s\t\t;\n", Y);
+	write_to_code(buffer);
+
+	char * temp = get_temp_label();
+	sprintf(buffer, "\t\t\tMM  %s\t\t;\n", temp);
+	write_to_code(buffer);
+
+	stack_push(operand_stack, temp);
+}
+
+void resolve_compare_less_than() {
+	char * Y = stack_pop(operand_stack);
+	char * X = stack_pop(operand_stack);
+
+	sprintf(buffer, "\t\t\tLD  %s\t\t; Comparacao X < Y\n", Y);
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\t-  %s\t\t;\n", X);
+	write_to_code(buffer);
+
+	char * temp = get_temp_label();
+	sprintf(buffer, "\t\t\tMM  %s\t\t;\n", temp);
+	write_to_code(buffer);
+
+	stack_push(operand_stack, temp);
+}
+
+void resolve_compare_equal_equal() {
+	char * Y = stack_pop(operand_stack);
+	char * X = stack_pop(operand_stack);
+
+	sprintf(buffer, "\t\t\tLD  %s\t\t; Comparacao X == Y\n", X);
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\t-  %s\t\t;\n", Y);
+	write_to_code(buffer);
+
+	char * is_equal = get_temp_label();
+	sprintf(buffer, "\t\t\tJZ  %s\t\t;\n", is_equal);
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tLD  zero\t; Nao e igual\n");
+	write_to_code(buffer);
+
+	char * is_not_equal = get_temp_label();
+	sprintf(buffer, "\t\t\tJP  %s\t\t;\n", is_not_equal);
+	write_to_code(buffer);
+
+	sprintf(buffer, "%s\t\t\tLD  one\t\t; E igual\n", is_equal);
+	write_to_code(buffer);
+
+	char * temp = get_temp_label();
+	sprintf(buffer, "%s\t\t\tMM  %s\t\t;\n", is_not_equal, temp);
+	write_to_code(buffer);
+
+	stack_push(operand_stack, temp);
+}
+
+// X o Y
+// o is the top of the operator stack
 // X is the second on the operand stack
 // Y is the top on the operand stack
-void resolve_expression() {
+void resolve_arithmetic(char * o) {
 	char * Y = stack_pop(operand_stack);
-	char * o = get_mvn_operator(stack_pop(operator_stack));
+	o = get_mvn_operator(o);
 	char * X = stack_pop(operand_stack);
 
 	sprintf(buffer, "\t\t\tLD  %s\t\t;\n", X);
@@ -321,6 +387,14 @@ void resolve_expression() {
 	write_to_code(buffer);
 
 	stack_push(operand_stack, temp);
+}
+
+void resolve_expression() {
+	char * o = stack_pop(operator_stack);
+	if(strcmp(o, ">") == 0) resolve_compare_greater_than();
+	else if(strcmp(o, "<") == 0) resolve_compare_less_than();
+	else if(strcmp(o, "==") == 0) resolve_compare_equal_equal();
+	else resolve_arithmetic(o);
 }
 
 void push_operand_true(Token *token) {
@@ -654,10 +728,10 @@ void init_semantic_actions() {
 //	actions_on_state_transition[MTYPE_EXPRESSION][0][MTTYPE_NOT] = 2;
 	actions_on_state_transition[MTYPE_EXPRESSION][0][MTTYPE_NUMBER] = push_operand;
 	actions_on_state_transition[MTYPE_EXPRESSION][0][MTTYPE_IDENTIFIER] = push_identifier;
-//
-//	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_GREATER_THAN] = 4;
-//	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_LESS_THAN] = 4;
-//	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_EQUAL_EQUAL] = 4;
+
+	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_GREATER_THAN] = push_operator;
+	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_LESS_THAN] = push_operator;
+	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_EQUAL_EQUAL] = push_operator;
 //	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_AND] = 4;
 //	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_OR] = 4;
 	actions_on_state_transition[MTYPE_EXPRESSION][1][MTTYPE_PLUS] = push_operator;
@@ -668,9 +742,9 @@ void init_semantic_actions() {
 //	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_LEFT_SQUARE_BRACKET] = 5;
 //	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_DOT] = 6;
 //	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_LEFT_PARENTHESES] = 7;
-//	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_GREATER_THAN] = 4;
-//	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_LESS_THAN] = 4;
-//	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_EQUAL_EQUAL] = 4;
+	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_GREATER_THAN] = push_operator;
+	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_LESS_THAN] = push_operator;
+	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_EQUAL_EQUAL] = push_operator;
 //	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_AND] = 4;
 //	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_OR] = 4;
 	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_PLUS] = push_operator;
