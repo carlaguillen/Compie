@@ -19,8 +19,12 @@
 
 int main(int argc, char **argv) {
 
-	init_file_reader("entrada_teste.txt");
-	init_file_writer("entrada_teste.txt");
+	if(argc < 2) {
+		printf("No input file to compile.");
+	}
+	char * filename = argv[1];
+	init_file_reader(filename);
+	init_file_writer(filename);
 	init_token();
 	init_transition_table();
 	spa_init();
