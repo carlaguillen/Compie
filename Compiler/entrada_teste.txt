@@ -1,17 +1,5 @@
 program
 
 main {
-	declare int num;
-	declare int fat;
-	input num;
-	fat = 1;
-	if (num < 0) {
-		fat = fat - 2;
-	} else {
-		while (num > 0) {
-			fat = fat * num;
-			num = num - 1;
-		}	
-	}
-	output fat;
+	declare int a;
 }

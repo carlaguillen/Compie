@@ -16,6 +16,7 @@
 Stack * empty_stack() {
 	Stack *stack = (Stack *)malloc(sizeof(Stack));
 	stack->head = NULL;
+	stack->parent = NULL;
 	return stack;
 }
 

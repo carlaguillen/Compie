@@ -167,4 +167,5 @@ cria_ra			JP  /0000		;
 				MM	STOP		;
 				RS	cria_ra		;
 
-				
+				@ /0100
+

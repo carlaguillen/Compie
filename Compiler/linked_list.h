@@ -22,21 +22,13 @@
 
 #define INDEX_NOT_FOUND -1
 
-/*TODO: Create strcut to hold attributes of the declarations
- Attributes {
- String lexeme;
- Tipo tipo;
- bool wasDeclared;
- bool wasReferenced;
- int posMem;
- }
-*/
-
-/*TODO: Modify linked list to support attributes */
 typedef struct node {
   char * data;
   char * label;
   int	wasDeclared;
+  int	functionAddress;
+  int 	parameterNumber;
+  int	raPosition;
   struct node * next;
 } Node;
 
@@ -49,6 +41,7 @@ List * empty_list();
 Node * get_node_at_index(int index, List *list);
 int add_list(char * data, List * list);
 int search_list(char * data, List *list);
+int search_list_on_label(char * label, List *list);
 void delete_list(char * data, List * list);
 void display_list(List * list);
 void destroy_list(List * list);

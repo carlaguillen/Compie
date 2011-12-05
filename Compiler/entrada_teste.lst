@@ -167,58 +167,16 @@
 012e 900c		;					MM	STOP		;
 0130 b11a		;					RS	cria_ra		;
 
-0132 0000		;					main		JP  /0000		;
-0134 a076		;				SC  input	; Comando de input
-0136 9a00		;				MM  V0		;
-0138 8a04		;				LD  K0		; Atribuicao de variavel
-013a 9a02		;				MM  V1		;
-013c 8002		;	I0			LD  zero	; Begin if case
-013e 8a06		;				LD  K1		; Comparacao X < Y
-0140 5a00		;				-  V0		;
-0142 9a08		;				MM  T0		;
-0144 8a08		;				LD  T0		;
-0146 2156		;				JN  _I0		;
-0148 1156		;				JZ  _I0		;
-014a 8a02		;				LD  V1		;
-014c 5a0a		;				-   K2		;
-014e 9a0c		;				MM  T1		;
-0150 8a0c		;				LD  T1		; Atribuicao de variavel
-0152 9a02		;				MM  V1		;
-0154 017e		;				JP  E0		;
-0156 8002		;	_I0			LD  zero	; End if case/Begin else case
-0158 8002		;	L0			LD  zero	; Begin while loop
-015a 8a00		;				LD  V0		; Comparacao X > Y
-015c 5a06		;				-   K1		;
-015e 9a0e		;				MM  T2		;
-0160 8a0e		;				LD  T2		;
-0162 217c		;				JN  _L0		;
-0164 117c		;				JZ  _L0		;
-0166 8a02		;				LD  V1		;
-0168 6a00		;				*   V0		;
-016a 9a10		;				MM  T3		;
-016c 8a10		;				LD  T3		; Atribuicao de variavel
-016e 9a02		;				MM  V1		;
-0170 8a00		;				LD  V0		;
-0172 5a04		;				-   K0		;
-0174 9a12		;				MM  T4		;
-0176 8a12		;				LD  T4		; Atribuicao de variavel
-0178 9a00		;				MM  V0		;
-017a 0158		;				JP  L0		;
-017c 8002		;	_L0			LD  zero	; End while loop
-017e 8002		;	E0			LD  zero	; End else case
-0180 8a02		;				LD  V1				; Comando de output
-0182 9018		;				MM  output_number	;
-0184 a01e		;				SC  output			;
-0186 c000		;				HM  /00		;
+; Function simple
+0132 0000		;	main		JP  /0000		;
+0134 8a00		;				LD  V0		; Comparacao X > Y
+0136 5a02		;				-   K0		;
+0138 9a04		;				MM  T0		;
+013a 8a04		;				LD  T0		; Atribuicao de variavel
+013c 9a00		;				MM  V0		;
+013e c000		;				HM  /00		;
 
 				;			 @ /0A00
 0a00 0000		;	V0			K  =0		; Declaracao de variavel
-0a02 0000		;	V1			K  =0		; Declaracao de variavel
-0a04 0001		;	K0			K  =1		; Declaracao de constante
-0a06 0000		;	K1			K  =0		; Declaracao de constante
-0a08 0000		;	T0			K  =0		; Declaracao de temporario
-0a0a 0002		;	K2			K  =2		; Declaracao de constante
-0a0c 0000		;	T1			K  =0		; Declaracao de temporario
-0a0e 0000		;	T2			K  =0		; Declaracao de temporario
-0a10 0000		;	T3			K  =0		; Declaracao de temporario
-0a12 0000		;	T4			K  =0		; Declaracao de temporario
+0a02 0001		;	K0			K  =1		; Declaracao de constante
+0a04 0000		;	T0			K  =0		; Declaracao de temporario

@@ -19,11 +19,15 @@
 
 Node * createnode(char * data);
 
+
 Node * createnode(char * data){
   Node * newNode = malloc(sizeof(Node));
   newNode->data = data;
   newNode->label = NULL;
   newNode->wasDeclared = 0;
+  newNode->functionAddress = 0;
+  newNode->parameterNumber = 0;
+  newNode->raPosition = 0;
   newNode->next = NULL;
   return newNode;
 }
@@ -88,6 +92,18 @@ int search_list(char * data, List *list) {
 	}
 	return INDEX_NOT_FOUND;
 }
+
+int search_list_on_label(char * label, List *list) {
+	int index = 0;
+	Node * current = list->head;
+	while (current != NULL) {
+		if(strcmp(current->label, label) == 0) return index;
+		current = current->next;
+		index++;
+	}
+	return INDEX_NOT_FOUND;
+}
+
 
 void delete_list(char * data, List * list){
   Node * current = list->head;

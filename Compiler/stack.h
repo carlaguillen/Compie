@@ -24,6 +24,7 @@ typedef struct _node {
 
 typedef struct _stack {
 	StackNode * head;
+	struct _stack * parent;
 } Stack;
 
 Stack * empty_stack();

@@ -29,14 +29,15 @@ extern List * constants_table;
 int search_reserved_words_table(char * data);
 int search_special_characters_table(char * data);
 
-void enter_new_scope();
-void exit_current_scope();
+void enter_new_table_of_symbols();
+void exit_current_table_of_symbols();
 int search_identifiers_table(char * data);
 int add_identifiers_table(char * data);
 int add_if_new_identifiers_table(char * data);
 Node * get_identifier_at_index(int index);
 Node * get_identifier_for_data(char * data);
 Node * get_identifier_for_data_on_current_table(char * data);
+Node * get_identifier_for_label_on_current_table(char * label);
 int search_constants_table(char * data);
 int add_constants_table(char * data);
 int add_if_new_constants_table(char * data);

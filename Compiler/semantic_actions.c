@@ -21,6 +21,8 @@
 #define ERR_VARIABLE_UNDECLARED 1
 #define ERR_VARIABLE_REDECLARED 2
 #define	ERR_UNSUPORTED_TYPE 3
+#define	ERR_FUNCTION_OVERIDING 4
+#define ERR_PARAMETER_REDECLARED 5
 
 char buffer[100];
 
@@ -32,19 +34,47 @@ static int loop_counter 		= 0;
 static int if_counter			= 0;
 static int else_counter			= 0;
 
+static int addr_counter			= 256;
+
+static int param_counter 		= 0;
+Node * current_function = NULL;
+
 Stack * operand_stack;
 Stack * operator_stack;
 
 Stack * command_operator_stack;
 Stack * command_operand_stack;
 
+void enter_new_scope() {
+	enter_new_table_of_symbols();
+}
+
+void exit_current_scope() {
+	exit_current_table_of_symbols();
+}
+
 void dummy_semantic_action(Token * token) {
 	// DOES NOTHING
 	printf("TODO\n");
 }
 
+char * get_constant_for_number(int number) {
+	char buf[5];
+	itoa(number, buf, 10);
+	Node * constant = get_identifier_at_index(add_if_new_identifiers_table(buf));
+	if (constant->label == NULL) {
+		constant->label = (char *)malloc(10*sizeof(char));
+		sprintf(constant->label, "K%d", constant_counter);
+		constant_counter++;
+
+		sprintf(buffer, "%s\t\t\tK  =%d\t\t; Declaracao de constante\n", constant->label, token->value);
+		write_to_data(buffer);
+	}
+	return constant->label;
+}
+
 char * get_constant_label() {
-	Node * constant = get_constant_at_index(add_if_new_constants_table(token->lexeme));
+	Node * constant = get_identifier_at_index(add_if_new_identifiers_table(token->lexeme));
 	if (constant->label == NULL) {
 		constant->label = (char *)malloc(10*sizeof(char));
 		sprintf(constant->label, "K%d", constant_counter);
@@ -108,6 +138,36 @@ char * get_else_label() {
 	return elsee;
 }
 
+int is_in_function() {
+	return !(current_function == NULL);
+}
+
+void print_load_variable_from_RA(int position) {
+	sprintf(buffer, "\t\t\tLD  %s\t\t; Carrega variavel do RA\n", get_constant_label(position));
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tMM  pos_param\t\t;\n");
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tSC  load_ra_pos\t\t;\n");
+	write_to_code(buffer);
+
+	addr_counter = addr_counter + 6;
+}
+
+void print_store_variable_from_RA(int position) {
+	sprintf(buffer, "\t\t\tLD  %s\t\t; Armazena acumulado na variavel do RA\n", get_constant_label(position));
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tMM  pos_param\t\t;\n");
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tSC  store_ra_pos\t\t;\n");
+	write_to_code(buffer);
+
+	addr_counter = addr_counter + 6;
+}
+
 /***********************************************************/
 /* 					PROGRAM ACTIONS						   */
 /***********************************************************/
@@ -115,6 +175,7 @@ char * get_else_label() {
 void print_main(Token *token) {
 	sprintf(buffer, "main\t\tJP  /0000\t\t;\n");
 	write_to_code(buffer);
+	addr_counter = addr_counter + 2;
 }
 
 void end_program(Token *token) {
@@ -122,17 +183,80 @@ void end_program(Token *token) {
 	write_to_code(buffer);
 	sprintf(buffer, "\t\t\t#  P \t\t;\n\n");
 	write_to_code(buffer);
+
+	addr_counter = addr_counter + 4;
 }
 
 void declare_variable(Token *token) {
 	Node *identifier = get_identifier_for_data_on_current_table(token->lexeme);
 	if(identifier->wasDeclared) {
 		char err[200];
-		sprintf(err, "redeclaration of variable \"%s\" in same scope", token->lexeme);
+		sprintf(err, "redeclaration of variable \"%s\" in function main", token->lexeme);
 		throw_semantic_exception(ERR_VARIABLE_REDECLARED, err);
 	} else {
 		identifier->wasDeclared = 1;
 	}
+}
+
+void declare_function(Token *token) {
+	Node *function = get_identifier_for_data_on_current_table(token->lexeme);
+	current_function = function;
+	if(function->wasDeclared) {
+		char err[200];
+		sprintf(err, "overiding of function \"%s\" in same scope", token->lexeme);
+		throw_semantic_exception(ERR_FUNCTION_OVERIDING, err);
+	} else {
+		sprintf(buffer, "; Function %s\n", token->lexeme);
+		write_to_code(buffer);
+		function->wasDeclared = 1;
+		function->functionAddress = addr_counter;
+		enter_new_scope();
+	}
+}
+
+void declare_parameter(Token *token) {
+	Node *parameter = get_identifier_for_data_on_current_table(token->lexeme);
+	if(parameter->wasDeclared) {
+		char err[200];
+		sprintf(err, "redeclaration of parameter \"%s\" in function \"%s\"", token->lexeme, current_function->data);
+		throw_semantic_exception(ERR_PARAMETER_REDECLARED, err);
+	} else {
+		parameter->wasDeclared = 1;
+		parameter->raPosition = param_counter;
+		param_counter++;
+	}
+}
+
+void declare_function_variable(Token *token) {
+	Node *variable = get_identifier_for_data_on_current_table(token->lexeme);
+		if(variable->wasDeclared) {
+			char err[200];
+			sprintf(err, "redeclaration of variable \"%s\" in function \"%s\"", token->lexeme, current_function->data);
+			throw_semantic_exception(ERR_VARIABLE_REDECLARED, err);
+		} else {
+			variable->wasDeclared = 1;
+			variable->raPosition = param_counter;
+			param_counter++;
+		}
+}
+
+void end_function(Token *token) {
+
+	print_load_variable_from_RA(current_function->parameterNumber);
+
+	char * temp = get_temp_label();
+	sprintf(buffer, "\t\t\tMM  %s\t\t;\n", temp);
+    write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tRS  %s\t\t;\n", temp);
+    write_to_code(buffer);
+
+	sprintf(buffer, "; End of function %s\n\n", current_function->data);
+	write_to_code(buffer);
+
+	current_function->parameterNumber = param_counter;
+	current_function = NULL;
+	exit_current_scope();
 }
 
 void throw_boolean_exception(Token *token) {
@@ -151,10 +275,14 @@ void push_control_command(Token *token) {
 		label = get_loop_label();
 		sprintf(buffer, "%s\t\t\tLD  zero\t; Begin while loop\n", label);
 		write_to_code(buffer);
+
+		addr_counter = addr_counter + 2;
 	} else if (strcmp(command, "if") == 0) {
 		label = get_if_label();
 		sprintf(buffer, "%s\t\t\tLD  zero\t; Begin if case\n", label);
 		write_to_code(buffer);
+
+		addr_counter = addr_counter + 2;
 	} else if (strcmp(command, "else") == 0) {
 		label = get_else_label();
 	}
@@ -181,30 +309,52 @@ void push_command_operand(Token *token) {
 }
 
 void resolve_output() {
-	sprintf(buffer, "\t\t\tLD  %s\t\t\t\t; Comando de output\n", stack_pop(command_operand_stack));
-	write_to_code(buffer);
+	if (is_in_function()) {
+		print_load_variable_from_RA(get_identifier_for_label_on_current_table(stack_pop(command_operand_stack))->raPosition);
+	} else {
+		sprintf(buffer, "\t\t\tLD  %s\t\t\t\t; Comando de output\n", stack_pop(command_operand_stack));
+		write_to_code(buffer);
+
+		addr_counter = addr_counter + 2;
+	}
 
 	sprintf(buffer, "\t\t\tMM  output_number\t;\n");
 	write_to_code(buffer);
 
 	sprintf(buffer, "\t\t\tSC  output\t\t\t;\n");
 	write_to_code(buffer);
+
+	addr_counter = addr_counter + 4;
 }
 
 void resolve_input() {
 	sprintf(buffer, "\t\t\tSC  input\t; Comando de input\n");
 	write_to_code(buffer);
 
-	sprintf(buffer, "\t\t\tMM  %s\t\t;\n", stack_pop(command_operand_stack));
-	write_to_code(buffer);
+	addr_counter = addr_counter + 2;
+
+	if (is_in_function()) print_store_variable_from_RA(get_identifier_for_label_on_current_table(stack_pop(command_operand_stack))->raPosition);
+	else {
+		sprintf (buffer, "\t\t\tMM  %s\t\t;\n", stack_pop(command_operand_stack));
+		write_to_code(buffer);
+
+		addr_counter = addr_counter + 2;
+	}
 }
 
 void resolve_assign() {
 	sprintf(buffer, "\t\t\tLD  %s\t\t; Atribuicao de variavel\n", stack_pop(operand_stack));
 	write_to_code(buffer);
 
-	sprintf(buffer, "\t\t\tMM  %s\t\t;\n", stack_pop(command_operand_stack));
-	write_to_code(buffer);
+	addr_counter = addr_counter + 2;
+
+	if (is_in_function()) print_store_variable_from_RA(get_identifier_for_label_on_current_table(stack_pop(command_operand_stack))->raPosition);
+	else {
+		sprintf(buffer, "\t\t\tMM  %s\t\t;\n", stack_pop(command_operand_stack));
+		write_to_code(buffer);
+
+		addr_counter = addr_counter + 2;
+	}
 }
 
 void resolve_while() {
@@ -221,6 +371,8 @@ void resolve_while() {
 
 	stack_push(command_operator_stack, "endwhile");
 	enter_new_scope();
+
+	addr_counter = addr_counter + 6;
 }
 
 void resolve_end_while() {
@@ -233,6 +385,8 @@ void resolve_end_while() {
 	write_to_code(buffer);
 
 	exit_current_scope();
+
+	addr_counter = addr_counter + 4;
 }
 
 void resolve_if() {
@@ -249,6 +403,8 @@ void resolve_if() {
 
 	stack_push(command_operator_stack, "endif");
 	enter_new_scope();
+
+	addr_counter = addr_counter + 4;
 }
 
 void resolve_end_if() {
@@ -258,6 +414,8 @@ void resolve_end_if() {
 	write_to_code(buffer);
 
 	exit_current_scope();
+
+	addr_counter = addr_counter + 2;
 }
 
 void resolve_else() {
@@ -273,6 +431,8 @@ void resolve_else() {
 
 	stack_push(command_operand_stack, else_label);
 	stack_push(command_operator_stack, "endelse");
+
+	addr_counter = addr_counter + 4;
 }
 
 void resolve_end_else() {
@@ -280,6 +440,16 @@ void resolve_end_else() {
 
 	sprintf(buffer, "%s\t\t\tLD  zero\t; End else case\n", label);
 	write_to_code(buffer);
+
+	addr_counter = addr_counter + 2;
+}
+
+void resolve_return() {
+	char * label = stack_pop(operand_stack);
+	sprintf(buffer, "\t\t\tLD  %s\t\t; Returns value\n", label);
+	write_to_code(buffer);
+
+	addr_counter = addr_counter + 2;
 }
 
 void resolve_command(Token *token) {
@@ -294,6 +464,7 @@ void resolve_command(Token *token) {
 	else if(strcmp(command, "endif") == 0) resolve_end_if();
 	else if(strcmp(command, "else") == 0) resolve_else();
 	else if(strcmp(command, "endelse") == 0) resolve_end_else();
+	else if(strcmp(command, "return") == 0) resolve_return();
 }
 
 
@@ -335,6 +506,8 @@ void resolve_compare_greater_than() {
 	write_to_code(buffer);
 
 	stack_push(operand_stack, temp);
+
+	addr_counter = addr_counter + 6;
 }
 
 void resolve_compare_less_than() {
@@ -352,6 +525,8 @@ void resolve_compare_less_than() {
 	write_to_code(buffer);
 
 	stack_push(operand_stack, temp);
+
+	addr_counter = addr_counter + 6;
 }
 
 void resolve_compare_equal_equal() {
@@ -383,6 +558,8 @@ void resolve_compare_equal_equal() {
 	write_to_code(buffer);
 
 	stack_push(operand_stack, temp);
+
+	addr_counter = addr_counter + 14;
 }
 
 void resolve_logic_and() {
@@ -400,6 +577,8 @@ void resolve_logic_and() {
 
 	stack_push(operand_stack, temp);
 	stack_push(operator_stack, "_and");
+
+	addr_counter = addr_counter + 6;
 }
 
 void end_logic_and() {
@@ -430,6 +609,8 @@ void end_logic_and() {
 	write_to_code(buffer);
 
 	stack_push(operand_stack, temp);
+
+	addr_counter = addr_counter + 14;
 }
 
 void resolve_logic_or() {
@@ -452,6 +633,8 @@ void resolve_logic_or() {
 	stack_push(operand_stack, yes_label);
 	stack_push(operand_stack, temp);
 	stack_push(operator_stack, "_or");
+
+	addr_counter = addr_counter + 8;
 }
 
 void end_logic_or() {
@@ -487,6 +670,8 @@ void end_logic_or() {
 	write_to_code(buffer);
 
 	stack_push(operand_stack, temp3);
+
+	addr_counter = addr_counter + 16;
 }
 
 void resolve_logic_not() {
@@ -517,6 +702,8 @@ void resolve_logic_not() {
 	write_to_code(buffer);
 
 	stack_push(operand_stack, temp3);
+
+	addr_counter = addr_counter + 14;
 }
 
 // X o Y
@@ -539,6 +726,8 @@ void resolve_arithmetic(char * o) {
 	write_to_code(buffer);
 
 	stack_push(operand_stack, temp);
+
+	addr_counter = addr_counter + 6;
 }
 
 void resolve_expression() {
@@ -595,10 +784,34 @@ void expression_end(Token *token) {
 	if(!stack_is_empty(operator_stack)) {
 		resolve_expression();
 		expression_end(token);
-	}/* else if(!stack_is_empty(operand_stack)) {
-		sprintf(buffer, "\t\t\tLD  %s\t\t;\n", stack_check(operand_stack));
-		write_to_code(buffer);
-	}*/
+	}
+}
+
+void function_call(Token *token) {
+	Node * function = get_identifier_for_label_on_current_table(stack_pop(operand_stack));
+
+	addr_counter = addr_counter + 12;
+
+	char * paramNumber = get_constant_for_number(function->parameterNumber);
+	sprintf(buffer, "\t\t\tLD  %s\t\t; Cria registro de ativacao\n", paramNumber);
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tMM ra_tam\t\t; \n");
+	write_to_code(buffer);
+
+	char * addressNumber = get_constant_for_number(addr_counter);
+	sprintf(buffer, "\t\t\tLD  %s\t\t;\n", addressNumber);
+	write_to_code(buffer);
+
+	sprintf(buffer, "\t\t\tMM  ra_end\t\t;\n");
+    write_to_code(buffer);
+
+    sprintf(buffer, "\t\t\tSC  cria_ra\t;\n");
+    write_to_code(buffer);
+
+    char * functionAddress = get_constant_for_number(function->functionAddress);
+    sprintf(buffer, "\t\t\tSC  %s\t\t; Chama funcao\n", functionAddress);
+    write_to_code(buffer);
 }
 
 void init_semantic_actions() {
@@ -715,7 +928,7 @@ void init_semantic_actions() {
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][33][MTTYPE_STRUCT] = 16;
 //
-//	actions_on_state_transition[MTYPE_PROGRAM][34][MTTYPE_IDENTIFIER] = 37;
+	actions_on_state_transition[MTYPE_PROGRAM][34][MTTYPE_IDENTIFIER] = declare_function;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][35][MTTYPE_IDENTIFIER] = 57;
 //
@@ -738,29 +951,29 @@ void init_semantic_actions() {
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][42][MTTYPE_DECLARE] = 3;
 //	actions_on_state_transition[MTYPE_PROGRAM][42][MTTYPE_FUNCTION] = 4;
-//	actions_on_state_transition[MTYPE_PROGRAM][42][MTTYPE_MAIN] = 5;
+	actions_on_state_transition[MTYPE_PROGRAM][42][MTTYPE_MAIN] = print_main;
 //
-//	actions_on_state_transition[MTYPE_PROGRAM][43][MTTYPE_IDENTIFIER] = 62;
+	actions_on_state_transition[MTYPE_PROGRAM][43][MTTYPE_IDENTIFIER] = declare_parameter;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][44][MTTYPE_LEFT_CURLY_BRACKET] = 45;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][45][MTTYPE_DECLARE] = 46;
-//	actions_on_state_transition[MTYPE_PROGRAM][45][MTTYPE_RIGHT_CURLY_BRACKET] = 47;
+	actions_on_state_transition[MTYPE_PROGRAM][45][MTTYPE_RIGHT_CURLY_BRACKET] = end_function;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][46][MTTYPE_STRUCT] = 50;
 //	actions_on_state_transition[MTYPE_PROGRAM][46][MTTYPE_INT] = 51;
 	actions_on_state_transition[MTYPE_PROGRAM][46][MTTYPE_BOOLEAN] = throw_boolean_exception;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][47][MTTYPE_FUNCTION] = 4;
-//	actions_on_state_transition[MTYPE_PROGRAM][47][MTTYPE_MAIN] = 5;
+	actions_on_state_transition[MTYPE_PROGRAM][47][MTTYPE_MAIN] = print_main;
 //
-//	actions_on_state_transition[MTYPE_PROGRAM][48][MTTYPE_RIGHT_CURLY_BRACKET] = 47;
+	actions_on_state_transition[MTYPE_PROGRAM][48][MTTYPE_RIGHT_CURLY_BRACKET] = end_function;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][49][MTTYPE_RIGHT_SQUARE_BRACKET] = 52;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][50][MTTYPE_IDENTIFIER] = 61;
 //
-	actions_on_state_transition[MTYPE_PROGRAM][51][MTTYPE_IDENTIFIER] = declare_variable;
+	actions_on_state_transition[MTYPE_PROGRAM][51][MTTYPE_IDENTIFIER] = declare_function_variable;
 //
 //	actions_on_state_transition[MTYPE_PROGRAM][52][MTTYPE_COMMA] = 41;
 //	actions_on_state_transition[MTYPE_PROGRAM][52][MTTYPE_SEMICOLON] = 42;
@@ -822,7 +1035,7 @@ void init_semantic_actions() {
 	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_WHILE] = push_control_command;
 	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_INPUT] = push_command;
 	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_OUTPUT] = push_command;
-//	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_RETURN] = 5;
+	actions_on_state_transition[MTYPE_COMMAND][0][MTTYPE_RETURN] = push_command;
 //
 	actions_on_state_transition[MTYPE_COMMAND][1][MTTYPE_EQUAL] = push_command;
 //	actions_on_state_transition[MTYPE_COMMAND][1][MTTYPE_LEFT_SQUARE_BRACKET] = 7;
@@ -900,7 +1113,7 @@ void init_semantic_actions() {
 
 //	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_LEFT_SQUARE_BRACKET] = 5;
 //	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_DOT] = 6;
-//	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_LEFT_PARENTHESES] = 7;
+	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_LEFT_PARENTHESES] = function_call;
 	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_GREATER_THAN] = push_operator;
 	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_LESS_THAN] = push_operator;
 	actions_on_state_transition[MTYPE_EXPRESSION][3][MTTYPE_EQUAL_EQUAL] = push_operator;

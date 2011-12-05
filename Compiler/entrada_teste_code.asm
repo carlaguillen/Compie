@@ -167,48 +167,9 @@ cria_ra			JP  /0000		;
 				MM	STOP		;
 				RS	cria_ra		;
 
-				main		JP  /0000		;
-			SC  input	; Comando de input
-			MM  V0		;
-			LD  K0		; Atribuicao de variavel
-			MM  V1		;
-I0			LD  zero	; Begin if case
-			LD  K1		; Comparacao X < Y
-			-  V0		;
-			MM  T0		;
-			LD  T0		;
-			JN  _I0		;
-			JZ  _I0		;
-			LD  V1		;
-			-   K2		;
-			MM  T1		;
-			LD  T1		; Atribuicao de variavel
-			MM  V1		;
-			JP  E0		;
-_I0			LD  zero	; End if case/Begin else case
-L0			LD  zero	; Begin while loop
-			LD  V0		; Comparacao X > Y
-			-   K1		;
-			MM  T2		;
-			LD  T2		;
-			JN  _L0		;
-			JZ  _L0		;
-			LD  V1		;
-			*   V0		;
-			MM  T3		;
-			LD  T3		; Atribuicao de variavel
-			MM  V1		;
-			LD  V0		;
-			-   K0		;
-			MM  T4		;
-			LD  T4		; Atribuicao de variavel
-			MM  V0		;
-			JP  L0		;
-_L0			LD  zero	; End while loop
-E0			LD  zero	; End else case
-			LD  V1				; Comando de output
-			MM  output_number	;
-			SC  output			;
+				@ /0100
+
+main		JP  /0000		;
 			HM  /00		;
 			#  P 		;
 
