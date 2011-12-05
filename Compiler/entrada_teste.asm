@@ -131,6 +131,7 @@ i_return	LD	input_number		;
 
 load_inst       LD  /0000				; Instrução para o acesso indireto
 store_inst		MM	/0000				; Instrução para store indireto
+return_inst		RS	/0000				; Instrução para retorno indireto
 pos_param       K   =0					; Posição do parâmetro da função
                                       
 load_ra_pos  	JP  /0000               ; Ponto de entrada da subrotina
@@ -167,10 +168,40 @@ cria_ra			JP  /0000		;
 				MM	STOP		;
 				RS	cria_ra		;
 
-				@ /0100
+				@ /0200
+
+; Function prettyprint
+F0			JP  /0000		;
+			LD  K0		; Carrega variavel do RA
+			MM  pos_param		;
+			SC  load_ra_pos		;
+			MM  output_number	;
+			SC  output			;
+			LD  K0		; Carrega variavel do RA
+			MM  pos_param		;
+			SC  load_ra_pos		;
+			+  return_inst		;
+			MM  _F0		;
+_F0			K  /0000		; Guarda o endereço de retorno
+; End of function prettyprint
 
 main		JP  /0000		;
+			SC  input	; Comando de input
+			MM  V1		;
+			LD  K1		; Cria registro de ativacao
+			MM ra_tam		; 
+			LD  K2		;
+			MM  ra_end		;
+			SC  cria_ra	;
+			SC  F0		; Chama funcao
+			LD  V1		; Atribuicao de variavel
+			MM  V1		;
 			HM  /00		;
 			#  P 		;
 
 		 @ /0A00
+V0			K  =0		; Declaracao de variavel
+K0			K  =1		; Declaracao de constante
+V1			K  =0		; Declaracao de variavel
+K1			K  =4		; Declaracao de constante
+K2			K  =4		; Declaracao de constante

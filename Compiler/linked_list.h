@@ -26,7 +26,6 @@ typedef struct node {
   char * data;
   char * label;
   int	wasDeclared;
-  int	functionAddress;
   int 	parameterNumber;
   int	raPosition;
   struct node * next;

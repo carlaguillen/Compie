@@ -23,6 +23,7 @@
 #define	ERR_UNSUPORTED_TYPE 3
 #define	ERR_FUNCTION_OVERIDING 4
 #define ERR_PARAMETER_REDECLARED 5
+#define ERR_UNDECLARED_FUNCTION 6
 
 char buffer[100];
 
@@ -33,8 +34,9 @@ static int variable_counter 	= 0;
 static int loop_counter 		= 0;
 static int if_counter			= 0;
 static int else_counter			= 0;
+static int func_counter			= 0;
 
-static int addr_counter			= 256;
+static int addr_counter			= 512;
 
 static int param_counter 		= 0;
 Node * current_function = NULL;
@@ -59,7 +61,7 @@ void dummy_semantic_action(Token * token) {
 }
 
 char * get_constant_for_number(int number) {
-	char buf[5];
+	char * buf = malloc(5*sizeof(char));
 	itoa(number, buf, 10);
 	Node * constant = get_identifier_at_index(add_if_new_identifiers_table(buf));
 	if (constant->label == NULL) {
@@ -137,6 +139,13 @@ char * get_else_label() {
 
 	return elsee;
 }
+char * get_func_label() {
+	char * func = (char *)malloc(10*sizeof(char));
+	sprintf(func, "F%d", func_counter);
+	func_counter++;
+
+	return func;
+}
 
 int is_in_function() {
 	return !(current_function == NULL);
@@ -208,8 +217,13 @@ void declare_function(Token *token) {
 	} else {
 		sprintf(buffer, "; Function %s\n", token->lexeme);
 		write_to_code(buffer);
+
+		char * label = get_func_label();
+		sprintf(buffer, "%s\t\t\tJP  /0000\t\t;\n", label);
+		write_to_code(buffer);
+
 		function->wasDeclared = 1;
-		function->functionAddress = addr_counter;
+		function->label = label;
 		enter_new_scope();
 	}
 }
@@ -244,11 +258,13 @@ void end_function(Token *token) {
 
 	print_load_variable_from_RA(current_function->parameterNumber);
 
-	char * temp = get_temp_label();
-	sprintf(buffer, "\t\t\tMM  %s\t\t;\n", temp);
+	sprintf(buffer, "\t\t\t+  return_inst\t\t;\n");
     write_to_code(buffer);
 
-	sprintf(buffer, "\t\t\tRS  %s\t\t;\n", temp);
+    sprintf(buffer, "\t\t\tMM  _%s\t\t;\n", current_function->label);
+    write_to_code(buffer);
+
+	sprintf(buffer, "_%s\t\t\tK  /0000\t\t; Guarda o endereço de retorno\n", current_function->label);
     write_to_code(buffer);
 
 	sprintf(buffer, "; End of function %s\n\n", current_function->data);
@@ -287,12 +303,12 @@ void push_control_command(Token *token) {
 		label = get_else_label();
 	}
 
-	stack_push(command_operator_stack, command);
-	stack_push(command_operand_stack, label);
+	stack_push(command_operator_stack, command, 0);
+	stack_push(command_operand_stack, label, 0);
 }
 
 void push_command(Token *token) {
-	stack_push(command_operator_stack, token->lexeme);
+	stack_push(command_operator_stack, token->lexeme, 0);
 }
 
 void push_command_operand(Token *token) {
@@ -300,7 +316,7 @@ void push_command_operand(Token *token) {
 	if(variable->wasDeclared) {
 		if(variable->label == NULL)
 			variable->label = get_variable_label();
-		stack_push(command_operand_stack, variable->label);
+		stack_push(command_operand_stack, variable->label, is_in_function());
 	} else {
 		char err[200];
 		sprintf(err, "trying to use undeclared variable \"%s\"", variable->data);
@@ -309,10 +325,11 @@ void push_command_operand(Token *token) {
 }
 
 void resolve_output() {
-	if (is_in_function()) {
-		print_load_variable_from_RA(get_identifier_for_label_on_current_table(stack_pop(command_operand_stack))->raPosition);
+	StackNode * identifier = stack_pop(command_operand_stack);
+	if (identifier->functionFlag) {
+		print_load_variable_from_RA(get_identifier_for_label_on_current_table(identifier->content)->raPosition);
 	} else {
-		sprintf(buffer, "\t\t\tLD  %s\t\t\t\t; Comando de output\n", stack_pop(command_operand_stack));
+		sprintf(buffer, "\t\t\tLD  %s\t\t\t\t; Comando de output\n", identifier->content);
 		write_to_code(buffer);
 
 		addr_counter = addr_counter + 2;
@@ -333,9 +350,10 @@ void resolve_input() {
 
 	addr_counter = addr_counter + 2;
 
-	if (is_in_function()) print_store_variable_from_RA(get_identifier_for_label_on_current_table(stack_pop(command_operand_stack))->raPosition);
+	StackNode *identifier = stack_pop(command_operand_stack);
+	if (identifier->functionFlag) print_store_variable_from_RA(get_identifier_for_label_on_current_table(identifier->content)->raPosition);
 	else {
-		sprintf (buffer, "\t\t\tMM  %s\t\t;\n", stack_pop(command_operand_stack));
+		sprintf (buffer, "\t\t\tMM  %s\t\t;\n", identifier->content);
 		write_to_code(buffer);
 
 		addr_counter = addr_counter + 2;
@@ -343,14 +361,19 @@ void resolve_input() {
 }
 
 void resolve_assign() {
-	sprintf(buffer, "\t\t\tLD  %s\t\t; Atribuicao de variavel\n", stack_pop(operand_stack));
-	write_to_code(buffer);
+	StackNode * identifier =  stack_pop(operand_stack);
+	if (identifier->functionFlag) print_load_variable_from_RA(get_identifier_for_label_on_current_table(identifier->content)->raPosition);
+	else {
+		sprintf(buffer, "\t\t\tLD  %s\t\t; Atribuicao de variavel\n", identifier->content);
+		write_to_code(buffer);
+	}
 
 	addr_counter = addr_counter + 2;
 
-	if (is_in_function()) print_store_variable_from_RA(get_identifier_for_label_on_current_table(stack_pop(command_operand_stack))->raPosition);
+	identifier = stack_pop(command_operand_stack);
+	if (identifier->functionFlag) print_store_variable_from_RA(get_identifier_for_label_on_current_table(identifier->content)->raPosition);
 	else {
-		sprintf(buffer, "\t\t\tMM  %s\t\t;\n", stack_pop(command_operand_stack));
+		sprintf(buffer, "\t\t\tMM  %s\t\t;\n", identifier->content);
 		write_to_code(buffer);
 
 		addr_counter = addr_counter + 2;
@@ -358,30 +381,32 @@ void resolve_assign() {
 }
 
 void resolve_while() {
-	char * label = stack_check(command_operand_stack);
+	StackNode * label = stack_check(command_operand_stack);
 
-	sprintf(buffer, "\t\t\tLD  %s\t\t;\n", stack_pop(operand_stack));
+	StackNode * identifier = stack_pop(operand_stack);
+	if(identifier->functionFlag) print_load_variable_from_RA(get_identifier_for_label_on_current_table(identifier->content)->raPosition);
+	sprintf(buffer, "\t\t\tLD  %s\t\t;\n", identifier->content);
 	write_to_code(buffer);
 
-	sprintf(buffer, "\t\t\tJN  _%s\t\t;\n", label);
+	sprintf(buffer, "\t\t\tJN  _%s\t\t;\n", label->content);
 	write_to_code(buffer);
 
-	sprintf(buffer, "\t\t\tJZ  _%s\t\t;\n", label);
+	sprintf(buffer, "\t\t\tJZ  _%s\t\t;\n", label->content);
 	write_to_code(buffer);
 
-	stack_push(command_operator_stack, "endwhile");
+	stack_push(command_operator_stack, "endwhile", 0);
 	enter_new_scope();
 
 	addr_counter = addr_counter + 6;
 }
 
 void resolve_end_while() {
-	char * label = stack_pop(command_operand_stack);
+	StackNode * label = stack_pop(command_operand_stack);
 
-	sprintf(buffer, "\t\t\tJP  %s\t\t;\n", label);
+	sprintf(buffer, "\t\t\tJP  %s\t\t;\n", label->content);
 	write_to_code(buffer);
 
-	sprintf(buffer, "_%s\t\t\tLD  zero\t; End while loop\n", label);
+	sprintf(buffer, "_%s\t\t\tLD  zero\t; End while loop\n", label->content);
 	write_to_code(buffer);
 
 	exit_current_scope();
@@ -390,27 +415,30 @@ void resolve_end_while() {
 }
 
 void resolve_if() {
-	char * label = stack_check(command_operand_stack);
+	StackNode * label = stack_check(command_operand_stack);
 
-	sprintf(buffer, "\t\t\tLD  %s\t\t;\n", stack_pop(operand_stack));
+
+	StackNode * identifier = stack_pop(operand_stack);
+	if(identifier->functionFlag) print_load_variable_from_RA(get_identifier_for_label_on_current_table(identifier->content)->raPosition);
+	sprintf(buffer, "\t\t\tLD  %s\t\t;\n", identifier->content);
 	write_to_code(buffer);
 
-	sprintf(buffer, "\t\t\tJN  _%s\t\t;\n", label);
+	sprintf(buffer, "\t\t\tJN  _%s\t\t;\n", label->content);
 	write_to_code(buffer);
 
-	sprintf(buffer, "\t\t\tJZ  _%s\t\t;\n", label);
+	sprintf(buffer, "\t\t\tJZ  _%s\t\t;\n", label->content);
 	write_to_code(buffer);
 
-	stack_push(command_operator_stack, "endif");
+	stack_push(command_operator_stack, "endif", 0);
 	enter_new_scope();
 
 	addr_counter = addr_counter + 4;
 }
 
 void resolve_end_if() {
-	char * label = stack_pop(command_operand_stack);
+	StackNode * label = stack_pop(command_operand_stack);
 
-	sprintf(buffer, "_%s\t\t\tLD  zero\t; End if case\n", label);
+	sprintf(buffer, "_%s\t\t\tLD  zero\t; End if case\n", label->content);
 	write_to_code(buffer);
 
 	exit_current_scope();
@@ -419,52 +447,52 @@ void resolve_end_if() {
 }
 
 void resolve_else() {
-	char * else_label = stack_pop(command_operand_stack);
-	char * end_if_label = stack_pop(command_operand_stack);
+	StackNode * else_label = stack_pop(command_operand_stack);
+	StackNode * end_if_label = stack_pop(command_operand_stack);
 	stack_pop(command_operator_stack);
 
-	sprintf(buffer, "\t\t\tJP  %s\t\t;\n", else_label);
+	sprintf(buffer, "\t\t\tJP  %s\t\t;\n", else_label->content);
 	write_to_code(buffer);
 
-	sprintf(buffer, "_%s\t\t\tLD  zero\t; End if case/Begin else case\n", end_if_label);
+	sprintf(buffer, "_%s\t\t\tLD  zero\t; End if case/Begin else case\n", end_if_label->content);
 	write_to_code(buffer);
 
-	stack_push(command_operand_stack, else_label);
-	stack_push(command_operator_stack, "endelse");
+	stack_push(command_operand_stack, else_label->content, 0);
+	stack_push(command_operator_stack, "endelse", 0);
 
 	addr_counter = addr_counter + 4;
 }
 
 void resolve_end_else() {
-	char * label = stack_pop(command_operand_stack);
+	StackNode * label = stack_pop(command_operand_stack);
 
-	sprintf(buffer, "%s\t\t\tLD  zero\t; End else case\n", label);
+	sprintf(buffer, "%s\t\t\tLD  zero\t; End else case\n", label->content);
 	write_to_code(buffer);
 
 	addr_counter = addr_counter + 2;
 }
 
 void resolve_return() {
-	char * label = stack_pop(operand_stack);
-	sprintf(buffer, "\t\t\tLD  %s\t\t; Returns value\n", label);
+	StackNode * label = stack_pop(operand_stack);
+	sprintf(buffer, "\t\t\tLD  %s\t\t; Returns value\n", label->content);
 	write_to_code(buffer);
 
 	addr_counter = addr_counter + 2;
 }
 
 void resolve_command(Token *token) {
-	char * command = stack_pop(command_operator_stack);
+	StackNode * command = stack_pop(command_operator_stack);
 
-	if(strcmp(command, "=") == 0) resolve_assign();
-	else if(strcmp(command, "output") == 0) resolve_output();
-	else if(strcmp(command, "input") == 0) resolve_input();
-	else if(strcmp(command, "while") == 0) resolve_while();
-	else if(strcmp(command, "endwhile") == 0) resolve_end_while();
-	else if(strcmp(command, "if") == 0) resolve_if();
-	else if(strcmp(command, "endif") == 0) resolve_end_if();
-	else if(strcmp(command, "else") == 0) resolve_else();
-	else if(strcmp(command, "endelse") == 0) resolve_end_else();
-	else if(strcmp(command, "return") == 0) resolve_return();
+	if(strcmp(command->content, "=") == 0) resolve_assign();
+	else if(strcmp(command->content, "output") == 0) resolve_output();
+	else if(strcmp(command->content, "input") == 0) resolve_input();
+	else if(strcmp(command->content, "while") == 0) resolve_while();
+	else if(strcmp(command->content, "endwhile") == 0) resolve_end_while();
+	else if(strcmp(command->content, "if") == 0) resolve_if();
+	else if(strcmp(command->content, "endif") == 0) resolve_end_if();
+	else if(strcmp(command->content, "else") == 0) resolve_else();
+	else if(strcmp(command->content, "endelse") == 0) resolve_end_else();
+	else if(strcmp(command->content, "return") == 0) resolve_return();
 }
 
 
@@ -492,52 +520,70 @@ char * get_mvn_operator(char * operator) {
 }
 
 void resolve_compare_greater_than() {
-	char * Y = stack_pop(operand_stack);
-	char * X = stack_pop(operand_stack);
+	StackNode * Y = stack_pop(operand_stack);
+	StackNode * X = stack_pop(operand_stack);
 
-	sprintf(buffer, "\t\t\tLD  %s\t\t; Comparacao X > Y\n", X);
-	write_to_code(buffer);
+	if(X->functionFlag) print_load_variable_from_RA(get_identifier_for_label_on_current_table(X->content)->raPosition);
+	else {
+		sprintf(buffer, "\t\t\tLD  %s\t\t; Comparacao X > Y\n", X->content);
+		write_to_code(buffer);
+	}
 
-	sprintf(buffer, "\t\t\t-   %s\t\t;\n", Y);
-	write_to_code(buffer);
+	if(Y->functionFlag) print_load_variable_from_RA(get_identifier_for_label_on_current_table(Y->content)->raPosition);
+	else {
+		sprintf(buffer, "\t\t\t-   %s\t\t;\n", Y->content);
+		write_to_code(buffer);
+	}
 
 	char * temp = get_temp_label();
 	sprintf(buffer, "\t\t\tMM  %s\t\t;\n", temp);
 	write_to_code(buffer);
 
-	stack_push(operand_stack, temp);
+	stack_push(operand_stack, temp, is_in_function());
 
 	addr_counter = addr_counter + 6;
 }
 
 void resolve_compare_less_than() {
-	char * Y = stack_pop(operand_stack);
-	char * X = stack_pop(operand_stack);
+	StackNode * Y = stack_pop(operand_stack);
+	StackNode * X = stack_pop(operand_stack);
 
-	sprintf(buffer, "\t\t\tLD  %s\t\t; Comparacao X < Y\n", Y);
-	write_to_code(buffer);
+	if(Y->functionFlag) print_load_variable_from_RA(get_identifier_for_label_on_current_table(Y->content)->raPosition);
+	else {
+		sprintf(buffer, "\t\t\tLD  %s\t\t; Comparacao X < Y\n", Y->content);
+		write_to_code(buffer);
+	}
 
-	sprintf(buffer, "\t\t\t-  %s\t\t;\n", X);
-	write_to_code(buffer);
+	if(X->functionFlag) print_load_variable_from_RA(get_identifier_for_label_on_current_table(X->content)->raPosition);
+	else {
+		sprintf(buffer, "\t\t\t-  %s\t\t;\n", X->content);
+		write_to_code(buffer);
+	}
 
 	char * temp = get_temp_label();
 	sprintf(buffer, "\t\t\tMM  %s\t\t;\n", temp);
 	write_to_code(buffer);
 
-	stack_push(operand_stack, temp);
+	stack_push(operand_stack, temp, is_in_function());
 
 	addr_counter = addr_counter + 6;
 }
 
 void resolve_compare_equal_equal() {
-	char * Y = stack_pop(operand_stack);
-	char * X = stack_pop(operand_stack);
+	StackNode * Y = stack_pop(operand_stack);
+	StackNode * X = stack_pop(operand_stack);
 
-	sprintf(buffer, "\t\t\tLD  %s\t\t; Comparacao X == Y\n", X);
-	write_to_code(buffer);
+	if(X->functionFlag) print_load_variable_from_RA(get_identifier_for_label_on_current_table(X->content)->raPosition);
+	else {
+		sprintf(buffer, "\t\t\tLD  %s\t\t; Comparacao X == Y\n", X->content);
+		write_to_code(buffer);
+	}
 
-	sprintf(buffer, "\t\t\t-  %s\t\t;\n", Y);
-	write_to_code(buffer);
+	if(Y->functionFlag) print_load_variable_from_RA(get_identifier_for_label_on_current_table(Y->content)->raPosition);
+	else {
+		sprintf(buffer, "\t\t\t-  %s\t\t;\n", Y->content);
+		write_to_code(buffer);
+	}
 
 	char * is_equal = get_temp_label_label();
 	sprintf(buffer, "\t\t\tJZ  %s\t\t;\n", is_equal);
@@ -557,16 +603,19 @@ void resolve_compare_equal_equal() {
 	sprintf(buffer, "%s\t\t\tMM  %s\t\t;\n", is_not_equal, temp);
 	write_to_code(buffer);
 
-	stack_push(operand_stack, temp);
+	stack_push(operand_stack, temp, is_in_function());
 
 	addr_counter = addr_counter + 14;
 }
 
 void resolve_logic_and() {
-	char * X = stack_pop(operand_stack);
+	StackNode * X = stack_pop(operand_stack);
 
-	sprintf(buffer, "\t\t\tLD  %s\t\t; Comeco do and logico\n", X);
-	write_to_code(buffer);
+	if(X->functionFlag) print_load_variable_from_RA(get_identifier_for_label_on_current_table(X->content)->raPosition);
+	else {
+		sprintf(buffer, "\t\t\tLD  %s\t\t; Comeco do and logico\n", X->content);
+		write_to_code(buffer);
+	}
 
 	char * temp = get_temp_label_label();
 	sprintf(buffer, "\t\t\tJZ  %s\t\t; Returns NO\n", temp);
@@ -575,23 +624,26 @@ void resolve_logic_and() {
 	sprintf(buffer, "\t\t\tJN  %s\t\t; Returns NO\n", temp);
 	write_to_code(buffer);
 
-	stack_push(operand_stack, temp);
-	stack_push(operator_stack, "_and");
+	stack_push(operand_stack, temp, is_in_function());
+	stack_push(operator_stack, "_and", 0);
 
 	addr_counter = addr_counter + 6;
 }
 
 void end_logic_and() {
-	char * Y = stack_pop(operand_stack);
-	char * no_label = stack_pop(operand_stack);
+	StackNode * Y = stack_pop(operand_stack);
+	StackNode * no_label = stack_pop(operand_stack);
 
-	sprintf(buffer, "\t\t\tLD  %s\t\t;\n", Y);
+	if(Y->functionFlag) print_load_variable_from_RA(get_identifier_for_label_on_current_table(Y->content)->raPosition);
+	else {
+		sprintf(buffer, "\t\t\tLD  %s\t\t;\n", Y->content);
+		write_to_code(buffer);
+	}
+
+	sprintf(buffer, "\t\t\tJZ  %s\t\t; Returns NO\n", no_label->content);
 	write_to_code(buffer);
 
-	sprintf(buffer, "\t\t\tJZ  %s\t\t; Returns NO\n", no_label);
-	write_to_code(buffer);
-
-	sprintf(buffer, "\t\t\tJN  %s\t\t; Returns NO\n", no_label);
+	sprintf(buffer, "\t\t\tJN  %s\t\t; Returns NO\n", no_label->content);
 	write_to_code(buffer);
 
 	sprintf(buffer, "\t\t\tLD  one\t\t;\n");
@@ -601,22 +653,22 @@ void end_logic_and() {
 	sprintf(buffer, "\t\t\tJP  %s\t\t; Returns YES\n", yes_label);
 	write_to_code(buffer);
 
-	sprintf(buffer, "%s\t\t\tLD zero\t;\n", no_label);
+	sprintf(buffer, "%s\t\t\tLD zero\t;\n", no_label->content);
 	write_to_code(buffer);
 
 	char * temp = get_temp_label();
 	sprintf(buffer, "%s\t\t\tMM  %s\t\t; Fim do and logico\n", yes_label, temp);
 	write_to_code(buffer);
 
-	stack_push(operand_stack, temp);
+	stack_push(operand_stack, temp, is_in_function());
 
 	addr_counter = addr_counter + 14;
 }
 
 void resolve_logic_or() {
-	char * X = stack_pop(operand_stack);
+	StackNode * X = stack_pop(operand_stack);
 
-	sprintf(buffer, "\t\t\tLD  %s\t\t; Comeco do or logico\n", X);
+	sprintf(buffer, "\t\t\tLD  %s\t\t; Comeco do or logico\n", X->content);
 	write_to_code(buffer);
 
 	char * temp = get_temp_label_label();
@@ -630,19 +682,19 @@ void resolve_logic_or() {
 	sprintf(buffer, "\t\t\tJP  %s\t\t; Returns YES\n", yes_label);
 	write_to_code(buffer);
 
-	stack_push(operand_stack, yes_label);
-	stack_push(operand_stack, temp);
-	stack_push(operator_stack, "_or");
+	stack_push(operand_stack, yes_label, 0);
+	stack_push(operand_stack, temp, 0);
+	stack_push(operator_stack, "_or", 0);
 
 	addr_counter = addr_counter + 8;
 }
 
 void end_logic_or() {
-	char * Y = stack_pop(operand_stack);
-	char * temp = stack_pop(operand_stack);
-	char * yes_label = stack_pop(operand_stack);
+	StackNode * Y = stack_pop(operand_stack);
+	StackNode* temp = stack_pop(operand_stack);
+	StackNode * yes_label = stack_pop(operand_stack);
 
-	sprintf(buffer, "%s\t\t\tLD  %s\t\t;\n", temp, Y);
+	sprintf(buffer, "%s\t\t\tLD  %s\t\t;\n", temp->content, Y->content);
 	write_to_code(buffer);
 
 	char * temp2 = get_temp_label_label();
@@ -652,7 +704,7 @@ void end_logic_or() {
 	sprintf(buffer, "\t\t\tJN  %s\t\t;\n", temp2);
 	write_to_code(buffer);
 
-	sprintf(buffer, "\t\t\tJP  %s\t\t; Returns YES\n", yes_label);
+	sprintf(buffer, "\t\t\tJP  %s\t\t; Returns YES\n", yes_label->content);
 	write_to_code(buffer);
 
 	sprintf(buffer, "%s\t\t\tLD  zero\t;\n", temp2);
@@ -662,23 +714,26 @@ void end_logic_or() {
 	sprintf(buffer, "\t\t\tJP  %s\t\t; Returns NO\n", no_label);
 	write_to_code(buffer);
 
-	sprintf(buffer, "%s\t\t\tLD one\t\t;\n", yes_label);
+	sprintf(buffer, "%s\t\t\tLD one\t\t;\n", yes_label->content);
 	write_to_code(buffer);
 
 	char * temp3 = get_temp_label();
 	sprintf(buffer, "%s\t\t\tMM  %s\t\t; Fim do or logico\n", no_label, temp3);
 	write_to_code(buffer);
 
-	stack_push(operand_stack, temp3);
+	stack_push(operand_stack, temp3, is_in_function());
 
 	addr_counter = addr_counter + 16;
 }
 
 void resolve_logic_not() {
-	char * Y = stack_pop(operand_stack);
+	StackNode * Y = stack_pop(operand_stack);
 
-	sprintf(buffer, "\t\t\tLD  %s\t\t; Comeco do not logico\n", Y);
-	write_to_code(buffer);
+	if(Y->functionFlag) print_load_variable_from_RA(get_identifier_for_label_on_current_table(Y->content)->raPosition);
+	else {
+		sprintf(buffer, "\t\t\tLD  %s\t\t; Comeco do not logico\n", Y->content);
+		write_to_code(buffer);
+	}
 
 	char * temp = get_temp_label_label();
 	sprintf(buffer, "\t\t\tJZ  %s\t\t; Returns NO\n", temp);
@@ -701,7 +756,7 @@ void resolve_logic_not() {
 	sprintf(buffer,"%s\t\t\tMM  %s\t\t; Fim do not logico\n",temp2, temp3);
 	write_to_code(buffer);
 
-	stack_push(operand_stack, temp3);
+	stack_push(operand_stack, temp3, is_in_function());
 
 	addr_counter = addr_counter + 14;
 }
@@ -711,27 +766,32 @@ void resolve_logic_not() {
 // X is the second on the operand stack
 // Y is the top on the operand stack
 void resolve_arithmetic(char * o) {
-	char * Y = stack_pop(operand_stack);
+	StackNode * Y = stack_pop(operand_stack);
 	o = get_mvn_operator(o);
-	char * X = stack_pop(operand_stack);
+	StackNode * X = stack_pop(operand_stack);
 
-	sprintf(buffer, "\t\t\tLD  %s\t\t;\n", X);
-	write_to_code(buffer);
-
-	sprintf(buffer, "\t\t\t%s  %s\t\t;\n", o, Y);
-	write_to_code(buffer);
+	if(X->functionFlag) print_load_variable_from_RA(get_identifier_for_label_on_current_table(X->content)->raPosition);
+	else {
+		sprintf(buffer, "\t\t\tLD  %s\t\t;\n", X->content);
+		write_to_code(buffer);
+	}
+	if(Y->functionFlag) print_load_variable_from_RA(get_identifier_for_label_on_current_table(Y->content)->raPosition);
+	else {
+		sprintf(buffer, "\t\t\t%s  %s\t\t;\n", o, Y->content);
+		write_to_code(buffer);
+	}
 
 	char * temp = get_temp_label();
 	sprintf(buffer, "\t\t\tMM  %s\t\t;\n", temp);
 	write_to_code(buffer);
 
-	stack_push(operand_stack, temp);
+	stack_push(operand_stack, temp, is_in_function());
 
 	addr_counter = addr_counter + 6;
 }
 
 void resolve_expression() {
-	char * o = stack_pop(operator_stack);
+	char * o = stack_pop(operator_stack)->content;
 	if(strcmp(o, ">") == 0) resolve_compare_greater_than();
 	else if(strcmp(o, "<") == 0) resolve_compare_less_than();
 	else if(strcmp(o, "==") == 0) resolve_compare_equal_equal();
@@ -744,24 +804,25 @@ void resolve_expression() {
 }
 
 void push_operand_true(Token *token) {
-	stack_push(operand_stack, "one");
+	stack_push(operand_stack, "one", 0);
 }
 
 void push_operand_false(Token *token) {
-	stack_push(operand_stack, "zero");
+	stack_push(operand_stack, "zero", 0);
 }
 
 void push_operand(Token * token) {
     char * label = get_constant_label(token->value);
-	stack_push(operand_stack, label);
+	stack_push(operand_stack, label, is_in_function());
 }
 
 void push_operator(Token *token) {
-	if(operator_precedence(stack_check(operator_stack)) > operator_precedence(token->lexeme)) {
+	StackNode *operator = stack_check(operator_stack);
+	if(operator != NULL && (operator_precedence(operator->content) > operator_precedence(token->lexeme))) {
 		resolve_expression();
 		push_operator(token);
 	} else {
-		stack_push(operator_stack, token->lexeme);
+		stack_push(operator_stack, token->lexeme, 0);
 		if (strcmp(token->lexeme, "and") == 0) resolve_expression();
 		if (strcmp(token->lexeme, "or") == 0) resolve_expression();
 	}
@@ -772,7 +833,7 @@ void push_identifier(Token *token) {
 	if(identifier->wasDeclared) {
 		if(identifier->label == NULL)
 			identifier->label = get_variable_label();
-		stack_push(operand_stack, identifier->label);
+		stack_push(operand_stack, identifier->label, is_in_function());
 	} else {
 		char err[200];
 		sprintf(err, "trying to use undeclared variable \"%s\"", token->lexeme);
@@ -788,30 +849,34 @@ void expression_end(Token *token) {
 }
 
 void function_call(Token *token) {
-	Node * function = get_identifier_for_label_on_current_table(stack_pop(operand_stack));
+	Node * function = get_identifier_for_label_on_current_table(stack_pop(operand_stack)->content);
+	if(function->wasDeclared) {
+		addr_counter = addr_counter + 12;
 
-	addr_counter = addr_counter + 12;
+		char * paramNumber = get_constant_for_number(function->parameterNumber);
+		sprintf(buffer, "\t\t\tLD  %s\t\t; Cria registro de ativacao\n", paramNumber);
+		write_to_code(buffer);
 
-	char * paramNumber = get_constant_for_number(function->parameterNumber);
-	sprintf(buffer, "\t\t\tLD  %s\t\t; Cria registro de ativacao\n", paramNumber);
-	write_to_code(buffer);
+		sprintf(buffer, "\t\t\tMM ra_tam\t\t; \n");
+		write_to_code(buffer);
 
-	sprintf(buffer, "\t\t\tMM ra_tam\t\t; \n");
-	write_to_code(buffer);
+		char * addressNumber = get_constant_for_number(addr_counter);
+		sprintf(buffer, "\t\t\tLD  %s\t\t;\n", addressNumber);
+		write_to_code(buffer);
 
-	char * addressNumber = get_constant_for_number(addr_counter);
-	sprintf(buffer, "\t\t\tLD  %s\t\t;\n", addressNumber);
-	write_to_code(buffer);
+		sprintf(buffer, "\t\t\tMM  ra_end\t\t;\n");
+		write_to_code(buffer);
 
-	sprintf(buffer, "\t\t\tMM  ra_end\t\t;\n");
-    write_to_code(buffer);
+		sprintf(buffer, "\t\t\tSC  cria_ra\t;\n");
+		write_to_code(buffer);
 
-    sprintf(buffer, "\t\t\tSC  cria_ra\t;\n");
-    write_to_code(buffer);
-
-    char * functionAddress = get_constant_for_number(function->functionAddress);
-    sprintf(buffer, "\t\t\tSC  %s\t\t; Chama funcao\n", functionAddress);
-    write_to_code(buffer);
+		sprintf(buffer, "\t\t\tSC  %s\t\t; Chama funcao\n", function->label);
+		write_to_code(buffer);
+	} else {
+		char err[200];
+		sprintf(err, "trying to use undeclared function %s", function->data);
+		throw_semantic_exception(ERR_UNDECLARED_FUNCTION, err);
+	}
 }
 
 void init_semantic_actions() {

@@ -1,5 +1,11 @@
 program
 
+function int prettyprint (int number) {
+	output number;
+}
+
 main {
-	declare int a;
+	declare int number;
+	input number;
+	number = prettyprint(number);
 }

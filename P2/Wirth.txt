@@ -1,0 +1,5 @@
+P2 Compiladores
+
+Wirth
+
+programa = stack_identifier 

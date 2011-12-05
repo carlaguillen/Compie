@@ -19,6 +19,7 @@
 
 typedef struct _node {
 	char * content;
+	int functionFlag;
 	struct _node *next;
 } StackNode;
 
@@ -28,9 +29,9 @@ typedef struct _stack {
 } Stack;
 
 Stack * empty_stack();
-void stack_push(Stack * head, char * c);
-char * stack_pop(Stack * head);
-char * stack_check(Stack * head);
+void stack_push(Stack * head, char * c, int f);
+StackNode * stack_pop(Stack * head);
+StackNode * stack_check(Stack * head);
 int stack_is_empty(Stack * head);
 
 #endif

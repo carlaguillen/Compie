@@ -131,6 +131,7 @@ i_return	LD	input_number		;
 
 load_inst       LD  /0000				; Instrução para o acesso indireto
 store_inst		MM	/0000				; Instrução para store indireto
+return_inst		RS	/0000				; Instrução para retorno indireto
 pos_param       K   =0					; Posição do parâmetro da função
                                       
 load_ra_pos  	JP  /0000               ; Ponto de entrada da subrotina
@@ -167,5 +168,5 @@ cria_ra			JP  /0000		;
 				MM	STOP		;
 				RS	cria_ra		;
 
-				@ /0100
+				@ /0200
 

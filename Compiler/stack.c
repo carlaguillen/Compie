@@ -20,37 +20,37 @@ Stack * empty_stack() {
 	return stack;
 }
 
-void stack_push(Stack * stack, char * c) {
+void stack_push(Stack * stack, char * c, int f) {
 	StackNode * node = malloc(sizeof(StackNode));
 
 	if (node == NULL) {
 		fprintf(stderr, "Error: no space available for Stack node\n");
 	} else {
 		node->content = c;
+		node->functionFlag = f;
 		node->next = stack->head;
 		stack->head = node;
 	}
 
 }
 
-char * stack_pop(Stack * stack) {
+StackNode * stack_pop(Stack * stack) {
 	if (stack_is_empty(stack)) {
 		fprintf(stderr, "Error: Underflow on Stack\n");
 		abort();
 	}
 
 	StackNode * top = stack->head;
-	char * c = top->content;
 	stack->head = top->next;
-	free(top);
-	return c;
+//	free(top);
+	return top;
 }
 
-char * stack_check(Stack * stack) {
+StackNode * stack_check(Stack * stack) {
 	if (stack_is_empty(stack)) {
 		return NULL;
 	} else {
-		return stack->head->content;
+		return stack->head;
 	}
 
 }

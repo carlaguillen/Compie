@@ -1,5 +1,5 @@
 				;			@ /0000 ;
-0000 a132		;	programa		SC	main	;
+0000 a218		;	programa		SC	main	;
 0002 0000		;	zero			K	=0		;
 0004 0001		;	one				K	=1		;
 0006 0002		;	two				K	=2		;
@@ -131,52 +131,76 @@
 
 00f0 8000		;	load_inst       LD  /0000				; Instrução para o acesso indireto
 00f2 9000		;	store_inst		MM	/0000				; Instrução para store indireto
-00f4 0000		;	pos_param       K   =0					; Posição do parâmetro da função
+00f4 b000		;	return_inst		RS	/0000				; Instrução para retorno indireto
+00f6 0000		;	pos_param       K   =0					; Posição do parâmetro da função
                                       
-00f6 0000		;	load_ra_pos  	JP  /0000               ; Ponto de entrada da subrotina
-00f8 800c		;	                LD  STOP                ; Carrega topo da pilha do R.A.
-00fa 5006		;	                -   two       			; Diminui um endereço na pilha do R.A.
-00fc 50f4		;	                -   pos_param			; Accumulador com o endereço correto
-00fe 40f0		;	                +   load_inst  			; Here's the magic: Cria instrução nova!
-0100 9102		;	                MM  hack				; Armazena como a PROXIMA INSTRUCAO! 
-0102 0000		;	hack			K  /0                   ; Reservado para guardar a instrução recém-montada
-0104 b0f6		;	                RS load_ra_pos		    ; Thanks to Débora for this piece of gold
+00f8 0000		;	load_ra_pos  	JP  /0000               ; Ponto de entrada da subrotina
+00fa 800c		;	                LD  STOP                ; Carrega topo da pilha do R.A.
+00fc 5006		;	                -   two       			; Diminui um endereço na pilha do R.A.
+00fe 50f6		;	                -   pos_param			; Accumulador com o endereço correto
+0100 40f0		;	                +   load_inst  			; Here's the magic: Cria instrução nova!
+0102 9104		;	                MM  hack				; Armazena como a PROXIMA INSTRUCAO! 
+0104 0000		;	hack			K  /0                   ; Reservado para guardar a instrução recém-montada
+0106 b0f8		;	                RS load_ra_pos		    ; Thanks to Débora for this piece of gold
 
-0106 0000		;	store_ra_pos	JP	/0000				;
-0108 800c		;					LD  STOP                ; Carrega topo da pilha do R.A.
-010a 5006		;	                -   two       			; Diminui um endereço na pilha do R.A.
-010c 50f4		;	                -   pos_param			; Accumulador com o endereço correto
-010e 40f2		;	                +   store_inst  		; Here's the magic: Cria instrução nova!
-0110 9112		;	                MM  hack2				; Armazena como a PROXIMA INSTRUCAO! 
-0112 0000		;	hack2			K  /0                   ; Reservado para guardar a instrução recém-montada
-0114 b106		;	                RS store_ra_pos		    ;
+0108 0000		;	store_ra_pos	JP	/0000				;
+010a 800c		;					LD  STOP                ; Carrega topo da pilha do R.A.
+010c 5006		;	                -   two       			; Diminui um endereço na pilha do R.A.
+010e 50f6		;	                -   pos_param			; Accumulador com o endereço correto
+0110 40f2		;	                +   store_inst  		; Here's the magic: Cria instrução nova!
+0112 9114		;	                MM  hack2				; Armazena como a PROXIMA INSTRUCAO! 
+0114 0000		;	hack2			K  /0                   ; Reservado para guardar a instrução recém-montada
+0116 b108		;	                RS store_ra_pos		    ;
 
-0116 0000		;	ra_tam			K   =0			;
-0118 0190		;	ra_end			K	=0400		;
+0118 0000		;	ra_tam			K   =0			;
+011a 0190		;	ra_end			K	=0400		;
 
-011a 0000		;	cria_ra			JP  /0000		;
-011c 800c		;					LD	STOP		;
-011e 4006		;					+	two			;
-0120 900c		;					MM	STOP		;
-0122 8002		;					LD	zero		;
-0124 90f4		;					MM	pos_param    ;
-0126 8118		;					LD	ra_end		 ;
-0128 a106		;					SC	store_ra_pos ;
-012a 800c		;					LD  STOP		;
-012c 4116		;					+	ra_tam		;
-012e 900c		;					MM	STOP		;
-0130 b11a		;					RS	cria_ra		;
+011c 0000		;	cria_ra			JP  /0000		;
+011e 800c		;					LD	STOP		;
+0120 4006		;					+	two			;
+0122 900c		;					MM	STOP		;
+0124 8002		;					LD	zero		;
+0126 90f6		;					MM	pos_param    ;
+0128 811a		;					LD	ra_end		 ;
+012a a108		;					SC	store_ra_pos ;
+012c 800c		;					LD  STOP		;
+012e 4118		;					+	ra_tam		;
+0130 900c		;					MM	STOP		;
+0132 b11c		;					RS	cria_ra		;
 
-; Function simple
-0132 0000		;	main		JP  /0000		;
-0134 8a00		;				LD  V0		; Comparacao X > Y
-0136 5a02		;				-   K0		;
-0138 9a04		;				MM  T0		;
-013a 8a04		;				LD  T0		; Atribuicao de variavel
-013c 9a00		;				MM  V0		;
-013e c000		;				HM  /00		;
+				;					@ /0200
+
+; Function prettyprint
+0200 0000		;	F0			JP  /0000		;
+0202 8a02		;				LD  K0		; Carrega variavel do RA
+0204 90f6		;				MM  pos_param		;
+0206 a0f8		;				SC  load_ra_pos		;
+0208 9018		;				MM  output_number	;
+020a a01e		;				SC  output			;
+020c 8a02		;				LD  K0		; Carrega variavel do RA
+020e 90f6		;				MM  pos_param		;
+0210 a0f8		;				SC  load_ra_pos		;
+0212 40f4		;				+  return_inst		;
+0214 9216		;				MM  _F0		;
+0216 0000		;	_F0			K  /0000		; Guarda o endereço de retorno
+; End of function prettyprint
+
+0218 0000		;	main		JP  /0000		;
+021a a076		;				SC  input	; Comando de input
+021c 9a04		;				MM  V1		;
+021e 8a06		;				LD  K1		; Cria registro de ativacao
+0220 9118		;				MM ra_tam		; 
+0222 8a08		;				LD  K2		;
+0224 911a		;				MM  ra_end		;
+0226 a11c		;				SC  cria_ra	;
+0228 a200		;				SC  F0		; Chama funcao
+022a 8a04		;				LD  V1		; Atribuicao de variavel
+022c 9a04		;				MM  V1		;
+022e c000		;				HM  /00		;
 
 				;			 @ /0A00
 0a00 0000		;	V0			K  =0		; Declaracao de variavel
 0a02 0001		;	K0			K  =1		; Declaracao de constante
-0a04 0000		;	T0			K  =0		; Declaracao de temporario
+0a04 0000		;	V1			K  =0		; Declaracao de variavel
+0a06 0004		;	K1			K  =4		; Declaracao de constante
+0a08 0004		;	K2			K  =4		; Declaracao de constante
