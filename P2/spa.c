@@ -20,62 +20,29 @@
 /***********************************************************/
 
 SpaStack *spa_stack;
+static int did_finish = 0;
 
 int spa_convert_token_to_machine_type() {
-	/* TODO: Redo*/
-	/*
 	switch (token->type) {
 
-		case TTYPE_RESERVED_WORD:
-			if ( strcmp(token->lexeme, "program")	== 0 ) 			return MTTYPE_PROGRAM;
-			if ( strcmp(token->lexeme, "main") 		== 0 ) 			return MTTYPE_MAIN;
-			if ( strcmp(token->lexeme, "typedef") 	== 0 ) 			return MTTYPE_TYPEDEF;
-			if ( strcmp(token->lexeme, "declare") 	== 0 ) 			return MTTYPE_DECLARE;
-			if ( strcmp(token->lexeme, "function")	== 0 ) 			return MTTYPE_FUNCTION;
-			if ( strcmp(token->lexeme, "return") 	== 0 ) 			return MTTYPE_RETURN;
-			if ( strcmp(token->lexeme, "struct")	== 0 ) 			return MTTYPE_STRUCT;
-			if ( strcmp(token->lexeme, "int")		== 0 ) 			return MTTYPE_INT;
-			if ( strcmp(token->lexeme, "boolean")	== 0 ) 			return MTTYPE_BOOLEAN;
-			if ( strcmp(token->lexeme, "if")		== 0 ) 			return MTTYPE_IF;
-			if ( strcmp(token->lexeme, "else")		== 0 )			return MTTYPE_ELSE;
-			if ( strcmp(token->lexeme, "while")		== 0 )			return MTTYPE_WHILE;
-			if ( strcmp(token->lexeme, "input")		== 0 )			return MTTYPE_INPUT;
-			if ( strcmp(token->lexeme, "output")	== 0 )			return MTTYPE_OUTPUT;
-			if ( strcmp(token->lexeme, "true")		== 0 )			return MTTYPE_TRUE;
-			if ( strcmp(token->lexeme, "false")		== 0 ) 			return MTTYPE_FALSE;
-			if ( strcmp(token->lexeme, "not")		== 0 ) 			return MTTYPE_NOT;
-			if ( strcmp(token->lexeme, "and")		== 0 )	 		return MTTYPE_AND;
-			if ( strcmp(token->lexeme, "or")		== 0 ) 			return MTTYPE_OR;
-			break;
-		case TTYPE_SPECIAL_CHARACTER:
-			if( strcmp(token->lexeme, "{")  == 0 )   return MTTYPE_LEFT_CURLY_BRACKET;
-			if( strcmp(token->lexeme, "}")  == 0 )   return MTTYPE_RIGHT_CURLY_BRACKET;
-			if( strcmp(token->lexeme, "[")  == 0 )   return MTTYPE_LEFT_SQUARE_BRACKET;
-			if( strcmp(token->lexeme, "]")  == 0 )   return MTTYPE_RIGHT_SQUARE_BRACKET;
+		case TTYPE_SPECIAL:
 			if( strcmp(token->lexeme, "(")  == 0 )   return MTTYPE_LEFT_PARENTHESES;
 			if( strcmp(token->lexeme, ")")  == 0 )   return MTTYPE_RIGHT_PARENTHESES;
-			if( strcmp(token->lexeme, ";")  == 0 )   return MTTYPE_SEMICOLON;
-			if( strcmp(token->lexeme, ",")  == 0 )   return MTTYPE_COMMA;
-			if( strcmp(token->lexeme, ".")  == 0 )   return MTTYPE_DOT;
-			if( strcmp(token->lexeme, "=")  == 0 )   return MTTYPE_EQUAL;
+			break;
+		case TTYPE_OPERATOR:
 			if( strcmp(token->lexeme, ">")  == 0 )   return MTTYPE_GREATER_THAN;
 			if( strcmp(token->lexeme, "<")  == 0 )   return MTTYPE_LESS_THAN;
-			if( strcmp(token->lexeme, "==") == 0 )	 return MTTYPE_EQUAL_EQUAL;
 			if( strcmp(token->lexeme, "+")  == 0 )   return MTTYPE_PLUS;
 			if( strcmp(token->lexeme, "-")  == 0 )   return MTTYPE_MINUS;
-			if( strcmp(token->lexeme, "*")  == 0 )   return MTTYPE_MULTIPLICATION;
-			if( strcmp(token->lexeme, "/")  == 0 )   return MTTYPE_DIVISION;
+			if( strcmp(token->lexeme, "?")  == 0 )   return MTTYPE_MINUS;
 			break;
-		case TTYPE_IDENTIFIER:
-			return MTTYPE_IDENTIFIER;
+		case TTYPE_ID:
+			return MTTYPE_ID;
 			break;
 		case TTYPE_NUM:
 			return MTTYPE_NUMBER;
 			break;
-		default:
-			break;
 	}
-	*/
 	return MTTYPE_INVALID;
 }
 
@@ -127,26 +94,35 @@ int transition_current_machine_with_token(int machine_token_type) {
 	}
 
 	/* transition was not valid -> check if can call another machine */
-	else {
-		int next_machine = machine_call_for_current_machine();
-		/* can call another machine */
-		if (next_machine != MTYPE_INVALID) {
-			call_machine(next_machine);
-			return transition_current_machine_with_token(machine_token_type);
-		}
-		/* cannot call another machine -> check if can pop a machine */
-		if (current_machine_is_in_final_state() && !spa_stack_is_empty(spa_stack)) {
+	int next_machine = machine_call_for_current_machine();
+	/* can call another machine */
+	if (next_machine != MTYPE_INVALID) {
+		call_machine(next_machine);
+		return transition_current_machine_with_token(machine_token_type);
+	}
+	/* cannot call another machine -> check if can pop a machine */
+	if (current_machine_is_in_final_state()) {
+		if (!spa_stack_is_empty(spa_stack)) {
 			return_machine();
 			return transition_current_machine_with_token(machine_token_type);
+		} else {
+			did_finish = 1;
+			return 1;
 		}
 	}
 
+	throw_semantic_exception(ERR_SINTATIC, "source code could not be correctly parsed");
+	did_finish = 1;
 	return 0;
 }
 
 /***********************************************************/
 /* 						PUBLIC							   */
 /***********************************************************/
+
+int spa_did_finish() {
+	return did_finish;
+}
 
 void spa_init() {
 	init_machines();
@@ -162,9 +138,12 @@ int spa_step() {
 
 	int machine_token_type = spa_convert_token_to_machine_type();
 
-	if (machine_token_type == MTTYPE_INVALID) return 0;
-
 	return transition_current_machine_with_token(machine_token_type);
+}
+
+void throw_sintatic_exception(int code, char *err) {
+	fprintf(stderr, "@sintatic - exception code-%d: %s\n", code, err);
+	halt = 1;
 }
 
 void throw_semantic_exception(int code, char * err) {
