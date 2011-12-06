@@ -64,8 +64,7 @@ int main(int argc, char **argv) {
 
 	get_next_token(); /* lexical analyser */
 	while (!spa_did_finish() && token->type != TTYPE_END_OF_FILE) {
-		if (token->type != TTYPE_COMMENT)
-			spa_step();
+		spa_step();
 		get_next_token(); /* lexical analyser */
 	}
 	if(!spa_did_finish()) throw_semantic_exception(ERR_SINTATIC, "source code could not be correctly parsed");
