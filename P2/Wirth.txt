@@ -1,5 +1,5 @@
-P2 Compiladores
+rogram = {  id (">" operation_right  | ( "<" | "+" | "-" ) operation_left | “?”) | number ">" operation_right|  “(“ (id |  id (">" operation_right  | ( "<" | "+" | "-" ) operation_left | “?”) | number ">" operation_right) { id (">" operation_right  | ( "<" | "+" | "-" ) operation_left | “?”) | number ">" operation_right} “)”} .
+ 
+operation_right =  id [ ">" operation_right  | ( "<" | "+" | "-" ) operation_left | “?”] .
 
-Wirth
-
-programa = stack_identifier 
+operation_left= id  [">" operation_right  | ( "<" | "+" | "-" ) operation_left | “?”] |  number [ ">" operation_right] .
