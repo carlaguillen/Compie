@@ -61,7 +61,7 @@ type_char get_type_char(char c) {
 
 void init_transition_table() {
 	int i, j;
-	for (i = 0; i < NUM_STATES; i++)
+	for (i = 0; i < NUM_STATES + 1; i++) /* state 0 doesn't exist*/
 		for (j = 0; j < NUM_TYPE_CHARS; j++)
 			transition_table[i][j] = 0;
 
@@ -122,40 +122,30 @@ void transducer_get_next_token() {
 		type_char = get_type_char(current_char);
 		next_state = transition_table[next_state][type_char];
 	}
-	
+
 	look_ahead_char = get_look_ahead();
 	type_look_ahead = get_type_char(look_ahead_char);
 	lexeme = empty_list();
 	alloc_add_list(current_char, lexeme);
 
 	/* while token is incomplete -- using the lookahead, next state isn't invalid (0) */
-	while(transition_table[next_state][type_look_ahead] != 0) { 
+	while(transition_table[next_state][type_look_ahead] != 0) {
 		current_char = get_next_char();
 		type_char = get_type_char(current_char);
 		look_ahead_char = get_look_ahead();
 		type_look_ahead = get_type_char(look_ahead_char);
-		lexeme = empty_list();
 		alloc_add_list(current_char, lexeme);
-
-		/* while token is incomplete -- using the lookahead, next state isn't invalid (0) */
-		while(transition_table[next_state][type_look_ahead] != 0) {
-			current_char = get_next_char();
-			type_char = get_type_char(current_char);
-			look_ahead_char = get_look_ahead();
-			type_look_ahead = get_type_char(look_ahead_char);
-			alloc_add_list(current_char, lexeme);
-			if(transition_table[next_state][type_char] == 1) {
-				/* token is complete now */
-				break;
-			}
-			next_state = transition_table[next_state][type_char];
-
+		if(transition_table[next_state][type_char] == 1) {
+			/* token is complete now */
+			break;
 		}
-		token_type = type_for_state(next_state);
-		/* fill typeof global variable (the value will be filled by lexico.c) */
+		next_state = transition_table[next_state][type_char];
+
 	}
+	token_type = type_for_state(next_state);
 	alloc_add_list('\0', lexeme);
-	/* fill lexeme of global variable (the value will be filled by lexico.c) */
+	/* fill type and lexeme of global variable (the value will be filled by lexico.c) */
+
 	token->type = token_type;
 	token->lexeme = get_string_array(lexeme);
 }
