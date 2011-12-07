@@ -54,41 +54,41 @@
 /************************************************************/
 /*					  TESTE SINTÁTICO						*/
 /************************************************************/
-
-int main(int argc, char **argv) {
-
-	init_file_reader("reverse.k");
-	init_token();
-	init_transition_table();
-	spa_init();
-
-	get_next_token(); /* lexical analyser */
-	while (!spa_did_finish()) {
-		spa_step();
-		get_next_token(); /* lexical analyser */
-	}
-	if(!spa_did_finish()) throw_semantic_exception(ERR_SINTATIC, "source code could not be correctly parsed");
-	return 0;
-}
-
-/************************************************************/
-/*					   TESTE LÉXICO							*/
-/************************************************************/
+//
 //int main(int argc, char **argv) {
 //
 //	init_file_reader("reverse.k");
 //	init_token();
 //	init_transition_table();
+//	spa_init();
 //
 //	get_next_token(); /* lexical analyser */
-//	print_token();
-//	while (token->type != TTYPE_END_OF_FILE) {
+//	while (!spa_did_finish()) {
+//		spa_step();
 //		get_next_token(); /* lexical analyser */
-//		print_token();
 //	}
-//
-//	display_id_table();
-//	display_operator_table();
-//	display_special_table();
+//	if(!spa_did_finish()) throw_semantic_exception(ERR_SINTATIC, "source code could not be correctly parsed");
 //	return 0;
 //}
+
+/************************************************************/
+/*					   TESTE LÉXICO							*/
+/************************************************************/
+int main(int argc, char **argv) {
+
+	init_file_reader("reverse.k");
+	init_token();
+	init_transition_table();
+
+	get_next_token(); /* lexical analyser */
+	print_token();
+	while (token->type != TTYPE_END_OF_FILE) {
+		get_next_token(); /* lexical analyser */
+		print_token();
+	}
+
+	display_id_table();
+	display_operator_table();
+	display_special_table();
+	return 0;
+}

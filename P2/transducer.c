@@ -159,4 +159,3 @@ void transducer_get_next_token() {
 	token->type = token_type;
 	token->lexeme = get_string_array(lexeme);
 }
-
