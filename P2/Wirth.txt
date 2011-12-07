@@ -1,5 +1,11 @@
-rogram = {  id (">" operation_right  | ( "<" | "+" | "-" ) operation_left | “?”) | number ">" operation_right|  “(“ (id |  id (">" operation_right  | ( "<" | "+" | "-" ) operation_left | “?”) | number ">" operation_right) { id (">" operation_right  | ( "<" | "+" | "-" ) operation_left | “?”) | number ">" operation_right} “)”} .
- 
-operation_right =  id [ ">" operation_right  | ( "<" | "+" | "-" ) operation_left | “?”] .
+program = { id (">" | "<" | "+" | "-" ) (operation_right | operation_left | "?" ) | number operation_right | "(" id ( program | ( ( operation_right | operation_left | "?" ) [program] ) ) ")" } .
 
-operation_left= id  [">" operation_right  | ( "<" | "+" | "-" ) operation_left | “?”] |  number [ ">" operation_right] .
+number = digit {digit} .
+
+digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" .
+
+id = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" | "@" .
+
+operation_right = ">" id { operation_right | operation_left | "?" } .
+
+operation_left= ( "<" | "+" | "-" ) ( id { operation_right | operation_left | "?" } | number { operation_right } ) .

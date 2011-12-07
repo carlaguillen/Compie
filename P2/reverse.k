@@ -1,2 +1,1 @@
-(i>r)(r>o)
-# Reverse K algorithm
+(2>b (c? 2>b))

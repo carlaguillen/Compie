@@ -13,9 +13,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "file_reader.h"
+#include "file_writer.h"
 #include "table_of_symbols.h"
 #include "spa.h"
-#include "file_writer.h"
 
 /************************************************************/
 /*					  TESTE SEMÂNTICO						*/
@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 	spa_init();
 
 	get_next_token(); /* lexical analyser */
-	while (!spa_did_finish() && token->type != TTYPE_END_OF_FILE) {
+	while (!spa_did_finish()) {
 		spa_step();
 		get_next_token(); /* lexical analyser */
 	}
