@@ -27,7 +27,7 @@ int type_for_state(int state) {
 		case 6:
 			return TTYPE_INVALID;
 		case 7:
-			return TTYPE_COMMENT;
+			return -1; /* comments are ignored (doesn't return a token) */
 		case 8:
 			return TTYPE_END_OF_FILE;
 		default:
@@ -116,8 +116,8 @@ void transducer_get_next_token() {
 	if (next_state == 8) {
 		token_type = TTYPE_END_OF_FILE;
 	}
-	/* ignoring spaces, \n and \t */
-	while(next_state == 1) { 
+	/* ignoring spaces, \n, \t and comments*/
+	while(next_state == 1 || next_state == 7) {
 		current_char = get_next_char();
 		type_char = get_type_char(current_char);
 		next_state = transition_table[next_state][type_char];
