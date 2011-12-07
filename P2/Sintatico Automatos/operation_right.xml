@@ -5,53 +5,36 @@
     <initial/>
   </state>
   <state name="q1" id="1">
-    <final/>
   </state>
   <state name="q2" id="2">
+    <final/>
   </state>
   <state name="q3" id="3">
-  </state>
-  <state name="q4" id="4">
     <final/>
   </state>
   <transition>
     <from>0</from>
     <to>1</to>
-    <read>id</read>
-  </transition>
-  <transition>
-    <from>1</from>
-    <to>2</to>
     <read>&quot;&gt;&quot;</read>
   </transition>
   <transition>
     <from>1</from>
-    <to>3</to>
-    <read>&quot;&lt;&quot;</read>
-  </transition>
-  <transition>
-    <from>1</from>
-    <to>3</to>
-    <read>&quot;+&quot;</read>
-  </transition>
-  <transition>
-    <from>1</from>
-    <to>3</to>
-    <read>&quot;-&quot;</read>
-  </transition>
-  <transition>
-    <from>1</from>
-    <to>4</to>
-    <read>&quot;?&quot;</read>
+    <to>2</to>
+    <read>id</read>
   </transition>
   <transition>
     <from>2</from>
-    <to>4</to>
+    <to>3</to>
     <read>operation_right</read>
   </transition>
   <transition>
-    <from>3</from>
-    <to>4</to>
+    <from>2</from>
+    <to>3</to>
     <read>operation_left</read>
+  </transition>
+  <transition>
+    <from>2</from>
+    <to>3</to>
+    <read>&quot;?&quot;</read>
   </transition>
 </structure>
