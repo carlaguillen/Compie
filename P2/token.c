@@ -38,8 +38,6 @@ char * string_for_type_token(int type) {
 			return "TTYPE_NUM";
 		case TTYPE_SPECIAL:
 			return "TTYPE_SPECIAL";
-		case TTYPE_COMMENT:
-			return "TTYPE_COMMENT";
 		case TTYPE_INVALID:
 			return "TTYPE_INVALID";
 		case TTYPE_END_OF_FILE:

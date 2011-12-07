@@ -27,7 +27,7 @@ int type_for_state(int state) {
 		case 6:
 			return TTYPE_INVALID;
 		case 7:
-			return TTYPE_COMMENT;
+			return -1; /* comments are ignored (doesn't return a token) */
 		case 8:
 			return TTYPE_END_OF_FILE;
 		default:
@@ -115,15 +115,23 @@ void transducer_get_next_token() {
 	/*eof?*/
 	if (next_state == 8) {
 		token_type = TTYPE_END_OF_FILE;
-		lexeme = empty_list();
-	} else {
-		/* ignoring spaces, \n and \t */
-		while(next_state == 1) {
-			current_char = get_next_char();
-			type_char = get_type_char(current_char);
-			next_state = transition_table[next_state][type_char];
-		}
+	}
+	/* ignoring spaces, \n, \t and comments*/
+	while(next_state == 1 || next_state == 7) {
+		current_char = get_next_char();
+		type_char = get_type_char(current_char);
+		next_state = transition_table[next_state][type_char];
+	}
+	
+	look_ahead_char = get_look_ahead();
+	type_look_ahead = get_type_char(look_ahead_char);
+	lexeme = empty_list();
+	alloc_add_list(current_char, lexeme);
 
+	/* while token is incomplete -- using the lookahead, next state isn't invalid (0) */
+	while(transition_table[next_state][type_look_ahead] != 0) { 
+		current_char = get_next_char();
+		type_char = get_type_char(current_char);
 		look_ahead_char = get_look_ahead();
 		type_look_ahead = get_type_char(look_ahead_char);
 		lexeme = empty_list();

@@ -19,9 +19,8 @@
 #define TTYPE_OPERATOR 0x01 << 1
 #define TTYPE_NUM 0x01 << 2
 #define TTYPE_SPECIAL 0x01 << 3
-#define TTYPE_COMMENT 0x01 << 4
-#define TTYPE_INVALID 0x01 << 5
-#define TTYPE_END_OF_FILE 0x01 << 6
+#define TTYPE_INVALID 0x01 << 4
+#define TTYPE_END_OF_FILE 0x01 << 5
 
 typedef struct {
 	int type;
