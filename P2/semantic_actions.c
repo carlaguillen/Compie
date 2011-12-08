@@ -17,7 +17,7 @@
 #include "table_of_symbols.h"
 #include "stack.h"
 #include "spa.h"
-
+#include <string.h>
 #define ERR_VARIABLE_UNDECLARED 1
 #define ERR_VARIABLE_REDECLARED 2
 #define	ERR_UNSUPORTED_TYPE 3
@@ -72,29 +72,6 @@ void resolve_end_while() {
 }
 
 void resolve_command(Token *token) {
-
-}
-
-char * get_mvn_operator(char * operator) {
-	if(strcmp(operator, "+") == 0) return "+ ";
-	if(strcmp(operator, "-") == 0) return "- ";
-	if(strcmp(operator, "*") == 0) return "* ";
-	/*if(strcmp(operator, "/") == 0)*/ return "/ ";
-}
-
-void resolve_compare_greater_than() {
-
-}
-
-void resolve_compare_less_than() {
-
-}
-
-// X o Y
-// o is the top of the operator stack
-// X is the second on the operand stack
-// Y is the top on the operand stack
-void resolve_arithmetic(char * o) {
 
 }
 
@@ -189,12 +166,34 @@ void resolve_minus() {
 	write_to_code(buffer);
 }
 
+void resolve_question_mark(Token *token) {
+	sprintf(buffer, "\t\tldloc  %s\n", operand1);
+	write_to_code(buffer);
+    sprintf(buffer,"\t\tcallvirt instance object [mscorlib]System.Collections.Stack::Peek()\n");
+    write_to_code(buffer);
+    sprintf(buffer,"\t\tldc.i4 0\n");
+    write_to_code(buffer);
+    sprintf(buffer,"\t\tbox [mscorlib]System.Int32\n");
+    write_to_code(buffer);
+    sprintf(buffer,"\t\tbne.un _ENDCLEAR\n");
+    write_to_code(buffer);
+    sprintf(buffer,"\t\tldloc %s\n", operand1);
+    write_to_code(buffer);
+    sprintf(buffer,"\t\tcallvirt instance void [mscorlib]System.Collections.Stack::Clear()\n");
+    write_to_code(buffer);
+    sprintf(buffer,"\t\t_ENDCLEAR:\n");
+    write_to_code(buffer);
+
+    operand1 = NULL;
+    operator1 = NULL;
+}
+
 void resolve_operation_and_continue(Token *t) {
 	if (strcmp(operator1,">") == 0) resolve_greater_than();
-	if (strcmp(operator1,"<") == 0) resolve_less_than();
-	if (strcmp(operator1,"+") == 0) resolve_plus();
-	if (strcmp(operator1,"-") == 0) resolve_minus();
-	if (strcmp(operator1,"?") == 0) resolve_question_mark(t);
+	else if (strcmp(operator1,"<") == 0) resolve_less_than();
+	else if (strcmp(operator1,"+") == 0) resolve_plus();
+	else if (strcmp(operator1,"-") == 0) resolve_minus();
+	else if (strcmp(operator1,"?") == 0) resolve_question_mark(t);
 
 	// special case
 	if (strcmp(t->lexeme,"?") == 0) operator1 = "?";
@@ -226,27 +225,6 @@ void save_operator(Token *token) {
 
 void expression_end(Token *token) {
 
-}
-
-void resolve_question_mark(Token *token) {
-	sprintf(buffer, "\t\tldloc  %s\n", operand1);
-	write_to_code(buffer);
-    sprintf(buffer,"\t\tcallvirt instance object [mscorlib]System.Collections.Stack::Peek()\n");
-    write_to_code(buffer);
-    sprintf(buffer,"\t\tldc.i4 0\n");
-    write_to_code(buffer);
-    sprintf(buffer,"\t\tbox [mscorlib]System.Int32\n");
-    write_to_code(buffer);
-    sprintf(buffer,"\t\tbne.un _ENDCLEAR\n");
-    write_to_code(buffer);
-    sprintf(buffer,"\t\tldloc %s\n", operand1);
-    write_to_code(buffer);
-    sprintf(buffer,"\t\tcallvirt instance void [mscorlib]System.Collections.Stack::Clear()\n");
-    write_to_code(buffer);
-    sprintf(buffer,"\t\t_ENDCLEAR:\n");
-    write_to_code(buffer);
-
-    operand1 = NULL;
 }
 
 void init_semantic_actions() {

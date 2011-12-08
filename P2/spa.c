@@ -89,7 +89,7 @@ void transition_to_next_state (int next_state) {
 
 int transition_current_machine_with_token(int machine_token_type) {
 
-	if(machine_token_type == MTTYPE_END_OF_FILE) {
+	if(machine_token_type == MTTYPE_END_OF_FILE || machine_token_type == -1) {
 		if (current_machine_is_in_final_state()) {
 			if (!spa_stack_is_empty(spa_stack)) {
 				return_machine();
