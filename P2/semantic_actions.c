@@ -44,7 +44,7 @@ void dummy_semantic_action(Token * token) {
 
 char * get_loop_label() {
 	char * loop = (char *)malloc(10*sizeof(char));
-	sprintf(loop, "L%d", loop_counter);
+	sprintf(loop, "_LOOP_%d", loop_counter);
 	loop_counter++;
 
 	return loop;
@@ -55,24 +55,34 @@ void end_program() {
 	write_to_code(buffer);
 }
 
-void push_control_command(Token *token) {
+void start_loop(Token *token) {
+	char * label = get_loop_label();
+	stack_push(command_operand_stack, label, 0);
+	operand1 = token->lexeme;
 
+	sprintf(buffer, "%s: ldloc %s\n", label, operand1);
+	write_to_code(buffer);
+
+	sprintf(buffer,"\t\tcallvirt instance object [mscorlib]System.Collections.Stack::Peek()\n\t\tunbox.any [mscorlib]System.Int32\n");
+	write_to_code(buffer);
+
+	sprintf(buffer,"\t\tldloc.i4 0\n");
+    write_to_code(buffer);
+
+	sprintf(buffer,"\t\tbeq %s_F\n", label);
+    write_to_code(buffer);
 }
 
-void push_command_operand(Token *token) {
+void end_loop(Token *token) {
+	char * label = stack_pop(command_operand_stack)->content;
 
-}
+	sprintf(buffer, "\t\tbr %s\n", label);
+	write_to_code(buffer);
 
-void resolve_while() {
+	sprintf(buffer, "%s_F:\n", label);
+	write_to_code(buffer);
 
-}
-
-void resolve_end_while() {
-
-}
-
-void resolve_command(Token *token) {
-
+	free(label);
 }
 
 int is_identifier(char * string) {
@@ -223,10 +233,6 @@ void save_operator(Token *token) {
 	operator1 = token->lexeme;
 }
 
-void expression_end(Token *token) {
-
-}
-
 void init_semantic_actions() {
 
 	command_operand_stack = empty_stack();
@@ -258,7 +264,7 @@ void init_semantic_actions() {
 	actions_on_state_transition[MTYPE_PROGRAM][3][MTTYPE_NUMBER] = save_operand;
 
 	/* machine call transitions */
-//	program.machine_calls[0][MTYPE_LOOP] = 3;
+//	actions_on_machine_transition[MTYPE_PROGRAM][0][MTYPE_LOOP] = 3;
 //	program.machine_calls[1][MTYPE_OPERATION_RIGHT] = 3;
 //	program.machine_calls[1][MTYPE_OPERATION_LEFT] = 3;
 //	program.machine_calls[2][MTYPE_OPERATION_RIGHT] = 3;
@@ -279,5 +285,41 @@ void init_semantic_actions() {
 	/***********************************************************/
 	/* 					  OPERATION LEFT					   */
 	/***********************************************************/
+	/* transition table */
+	actions_on_machine_transition[MTYPE_OPERATION_LEFT][0][MTTYPE_LESS_THAN] = save_operator;
+	actions_on_machine_transition[MTYPE_OPERATION_LEFT][0][MTTYPE_PLUS] = save_operator;
+	actions_on_machine_transition[MTYPE_OPERATION_LEFT][0][MTTYPE_MINUS] = save_operator;
 
+	actions_on_machine_transition[MTYPE_OPERATION_LEFT][1][MTTYPE_ID] = save_operand;
+	actions_on_machine_transition[MTYPE_OPERATION_LEFT][1][MTTYPE_NUMBER] = save_operand;
+
+	actions_on_machine_transition[MTYPE_OPERATION_LEFT][2][MTTYPE_QUESTION_MARK] = resolve_operation_and_continue;
+
+	/* machine call transitions */
+	actions_on_machine_transition[MTYPE_OPERATION_LEFT][2][MTYPE_OPERATION_RIGHT] = resolve_operation_and_continue;
+	actions_on_machine_transition[MTYPE_OPERATION_LEFT][2][MTYPE_OPERATION_LEFT] = resolve_operation_and_continue;
+	actions_on_machine_transition[MTYPE_OPERATION_LEFT][3][MTYPE_OPERATION_RIGHT] = resolve_operation_and_continue;
+
+	/* machine return */
+	actions_on_machine_return[MTYPE_OPERATION_LEFT][2] = resolve_operation;
+	actions_on_machine_return[MTYPE_OPERATION_LEFT][3] = resolve_operation;
+	actions_on_machine_return[MTYPE_OPERATION_LEFT][4] = resolve_operation;
+
+	/***********************************************************/
+	/* 					  		LOOP						   */
+	/***********************************************************/
+	/* transition table */
+	actions_on_state_transition[MTYPE_LOOP][1][MTTYPE_ID] = start_loop;
+
+	actions_on_state_transition[MTYPE_LOOP][2][MTTYPE_ID] =  save_operand;
+	actions_on_state_transition[MTYPE_LOOP][2][MTTYPE_QUESTION_MARK] =  resolve_question_mark;
+	actions_on_state_transition[MTYPE_LOOP][2][MTTYPE_NUMBER] =  save_operand;
+
+	actions_on_state_transition[MTYPE_LOOP][4][MTTYPE_QUESTION_MARK] =  resolve_question_mark;
+
+	actions_on_state_transition[MTYPE_LOOP][5][MTTYPE_ID] =  save_operand;
+	actions_on_state_transition[MTYPE_LOOP][5][MTTYPE_NUMBER] =  save_operand;
+
+	/* machine return */
+	actions_on_machine_return[MTYPE_LOOP][6] = end_loop;
 }
