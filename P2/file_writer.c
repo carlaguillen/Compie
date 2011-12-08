@@ -14,11 +14,11 @@
 #include "file_writer.h"
 #include "util.h"
 
-#define CODE_APPEND "_code.asm"
-#define DATA_APPEND "_data.asm"
+#define CODE_APPEND "_code.il"
+#define DATA_APPEND "_data.il"
 
 void init_code_buffer() {
-	FILE * execution_enviroment = fopen("execution_environment.asm", "r");
+	FILE * execution_enviroment = fopen("ambienteexecucao.il", "r");
 	char buffer[128];
 
 	if (execution_enviroment != NULL)
@@ -28,7 +28,6 @@ void init_code_buffer() {
 }
 
 void init_data_buffer() {
-	fprintf(writer->data_buffer, "\t\t @ /0A00\n");
 }
 
 void init_file_writer(char * path) {
@@ -62,7 +61,7 @@ void close_file_writer() {
 
 int merge_code_data() {
 	char * filepath = remove_ext(writer->filepath, '.', '/');
-	FILE *object = fopen(strcat(filepath, ".asm"), "w");
+	FILE *object = fopen(strcat(filepath, ".il"), "w");
 	if (object == NULL) return 0;
 
 	char buffer[128];

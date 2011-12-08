@@ -6,88 +6,6 @@
 }
 
 
-
-// =============== CLASS MEMBERS DECLARATION ===================
-
-.class private auto ansi beforefieldinit ConsoleApplication2.Program
-       extends [mscorlib]System.Object
-{
-  .method private hidebysig static void  Main(string[] args)
-  {
-    .entrypoint
-    .maxstack 27 //uma para cada variavel? (repensar)
-
-    .locals init ([0] class Auxiliar.SpecialStack<int32> a)
-
-    // cria a pilha e guarda na variavel a
-    newobj instance void class Auxiliar.SpecialStack<int32>::.ctor()
-    stloc.0
-
-    // load variavel a 
-    ldloc a
-
-    // load constante 123
-    ldc.i4.s 123
-    box [mscorlib]System.Int32
-
-    // push (instance = a e object = 123)
-    callvirt instance void [mscorlib]System.Collections.Stack::Push(object)
-
-    // load variavel a 
-    ldloc a
-
-    // load constante 456
-    ldc.i4 456
-    box [mscorlib]System.Int32
-
-    // push (instance = a e object = 456)
-    callvirt instance void [mscorlib]System.Collections.Stack::Push(object)
-
-    // agora a contém [123 456_]
-    ldloc.0
-   
-    // pop em a (e joga valor retornado na stack)
-    callvirt instance object [mscorlib]System.Collections.Stack::Pop()
-
-    // imprime topo da pilha
-    call void [mscorlib]System.Console::WriteLine(object)
-
-    // load variavel a 
-    ldloc a
-
-    // pop em a (e joga valor retornado na stack)
-    callvirt instance object [mscorlib]System.Collections.Stack::Pop()
-
-    // imprime topo da pilha
-    call void [mscorlib]System.Console::WriteLine(object)
-
-
-
-    //-------------------pop pilha vazia (testando funcionalidades do specialstack)
-    // load variavel a 
-    ldloc a
-    // pop em a (e joga valor retornado na stack)
-    callvirt instance object [mscorlib]System.Collections.Stack::Pop()
-    // imprime topo da pilha
-    call void [mscorlib]System.Console::WriteLine(object)
-
-    // dando peek em pilha vazia
-     ldloc a
-    // pop em a (e joga valor retornado na stack)
-    callvirt instance object [mscorlib]System.Collections.Stack::Peek()
-    // imprime topo da pilha
-    call void [mscorlib]System.Console::WriteLine(object)
-
-
-  } // end of method Program::Main
-
-} // end of class ConsoleApplication2.Program
-
-
-
-
-
-
 // ========================= AUXILIAR CLASS ====================================
 // special stack returns 0 when Pop() or Peek() is called for an empty stack
 
@@ -172,4 +90,107 @@
 
 
 // =============================================================
+
+
+
+// =============== CLASS MEMBERS DECLARATION ===================
+
+.class private auto ansi beforefieldinit ConsoleApplication2.Program
+       extends [mscorlib]System.Object
+{
+  .method private hidebysig static void  Main(string[] args)
+  {
+    .entrypoint
+    .maxstack 20 //uma para cada variavel? (repensar)
+
+    .locals init ([0] class Auxiliar.SpecialStack<int32> a)
+    // cria a pilha e guarda na variavel a
+    newobj instance void class Auxiliar.SpecialStack<int32>::.ctor()
+    stloc.0
+
+
+    ldloc  a
+    ldc.i4 12
+    //box [mscorlib]System.Int32 
+    callvirt instance void [mscorlib]System.Collections.Stack::Push(object)
+
+ //sub
+  ldloc  a  //preload para push
+  ldloc  a
+ 
+  callvirt instance object [mscorlib]System.Collections.Stack::Peek()
+  box [mscorlib]System.Int32
+
+  ldc.i4 12
+  //box [mscorlib]System.Int32
+   
+  sub
+  //box [mscorlib]System.Int32
+  //callvirt instance void [mscorlib]System.Collections.Stack::Push(object)
+
+  call void [mscorlib]System.Console::WriteLine(int32)
+  ret
+
+
+    // // load variavel a 
+    // ldloc a
+    // // load constante 123
+    // ldc.i4 123
+    // box [mscorlib]System.Int32
+    // // push (instance = a e object = 123)
+    // callvirt instance void [mscorlib]System.Collections.Stack::Push(object)
+
+    // // load variavel a 
+    // ldloc a
+    // // load constante 456
+    // ldc.i4 456
+    // box [mscorlib]System.Int32
+    // // push (instance = a e object = 456)
+    // callvirt instance void [mscorlib]System.Collections.Stack::Push(object)
+
+  
+    // // agora a contém [123 456_]
+    // ldloc.0
+    // // pop em a (e joga valor retornado na stack)
+    // callvirt instance object [mscorlib]System.Collections.Stack::Pop()
+    // // imprime topo da pilha
+    // call void [mscorlib]System.Console::WriteLine(object)
+
+    // // load variavel a 
+    // ldloc a
+
+    // // pop em a (e joga valor retornado na stack)
+    // callvirt instance object [mscorlib]System.Collections.Stack::Pop()
+
+    // // imprime topo da pilha
+    // call void [mscorlib]System.Console::WriteLine(object)
+
+
+
+    // //-------------------pop pilha vazia (testando funcionalidades do specialstack)
+    // // load variavel a 
+    // ldloc a
+    // // pop em a (e joga valor retornado na stack)
+    // callvirt instance object [mscorlib]System.Collections.Stack::Pop()
+    // // imprime topo da pilha
+    // call void [mscorlib]System.Console::WriteLine(object)
+
+    // // dando peek em pilha vazia
+    //  ldloc a
+    // // pop em a (e joga valor retornado na stack)
+    // callvirt instance object [mscorlib]System.Collections.Stack::Peek()
+    // // imprime topo da pilha
+    // call void [mscorlib]System.Console::WriteLine(object)
+
+   
+
+  } // end of method Program::Main
+
+} // end of class ConsoleApplication2.Program
+
+
+
+
+
+
 

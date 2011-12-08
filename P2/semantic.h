@@ -19,4 +19,6 @@
 
 #include "semantic_actions.h"
 
+void end_program();
+
 #endif /* SEMANTIC_H_ */

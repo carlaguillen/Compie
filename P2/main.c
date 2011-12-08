@@ -58,6 +58,7 @@
 int main(int argc, char **argv) {
 
 	init_file_reader("reverse.k");
+	init_file_writer("reverse.il");
 	init_token();
 	init_transition_table();
 	spa_init();
@@ -68,6 +69,10 @@ int main(int argc, char **argv) {
 		get_next_token(); /* lexical analyser */
 	}
 	if(!spa_did_finish()) throw_semantic_exception(ERR_SINTATIC, "source code could not be correctly parsed");
+
+	close_file_writer();
+	merge_code_data();
+
 	return 0;
 }
 

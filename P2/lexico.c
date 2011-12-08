@@ -43,6 +43,7 @@ void complete_token() {
 			c -= 'A' - 'a';
 			char s[] = {c,'\0'};
 			token->value = search_id_table(s);
+			token->lexeme = s;
 		} else{
 			token->value = search_id_table(token->lexeme);
 		}

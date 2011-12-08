@@ -95,6 +95,7 @@ int transition_current_machine_with_token(int machine_token_type) {
 				return_machine();
 				return transition_current_machine_with_token(machine_token_type);
 			} else {
+				end_program();
 				did_finish = 1;
 				return 1;
 			}
@@ -121,6 +122,7 @@ int transition_current_machine_with_token(int machine_token_type) {
 				return_machine();
 				return transition_current_machine_with_token(machine_token_type);
 			} else {
+				end_program();
 				did_finish = 1;
 				return 1;
 			}
