@@ -111,7 +111,7 @@
 
     ldloc  a
     ldc.i4 12
-    //box [mscorlib]System.Int32 
+    box [mscorlib]System.Int32 
     callvirt instance void [mscorlib]System.Collections.Stack::Push(object)
 
  //sub
@@ -119,10 +119,9 @@
   ldloc  a
  
   callvirt instance object [mscorlib]System.Collections.Stack::Peek()
-  box [mscorlib]System.Int32
+  unbox.any  [mscorlib]System.Int32
 
-  ldc.i4 12
-  //box [mscorlib]System.Int32
+  ldc.i4 13
    
   sub
   //box [mscorlib]System.Int32

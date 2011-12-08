@@ -25,7 +25,7 @@
 #define ERR_PARAMETER_REDECLARED 5
 #define ERR_UNDECLARED_FUNCTION 6
 
-char buffer[100];
+char buffer[500];
 
 static int loop_counter 		= 0;
 
@@ -39,7 +39,7 @@ Stack * command_operand_stack;
 
 void dummy_semantic_action(Token * token) {
 	// DOES NOTHING
-	printf("TODO\n");
+	//printf("TODO\n");
 }
 
 char * get_loop_label() {
@@ -66,7 +66,7 @@ void start_loop(Token *token) {
 	sprintf(buffer,"\t\tcallvirt instance object [mscorlib]System.Collections.Stack::Peek()\n\t\tunbox.any [mscorlib]System.Int32\n");
 	write_to_code(buffer);
 
-	sprintf(buffer,"\t\tldloc.i4 0\n");
+	sprintf(buffer,"\t\tldc.i4 0\n");
     write_to_code(buffer);
 
 	sprintf(buffer,"\t\tbeq %s_F\n", label);
@@ -135,19 +135,19 @@ void resolve_plus() {
 	write_to_code(buffer);
 	sprintf(buffer, "\t\tldloc  %s\n", operand1);
 	write_to_code(buffer);
-	sprintf(buffer,"\t\tcallvirt instance object [mscorlib]System.Collections.Stack::Peek()\n");
+	sprintf(buffer,"\t\tcallvirt instance object [mscorlib]System.Collections.Stack::Peek()\n\t\tunbox.any [mscorlib]System.Int32\n");
 	write_to_code(buffer);
 	if(is_identifier(operand2)) {
 		sprintf(buffer, "\t\tldloc  %s\n", operand2);
 		write_to_code(buffer);
-		sprintf(buffer,"\t\tcallvirt instance object [mscorlib]System.Collections.Stack::Pop()\n");
+		sprintf(buffer,"\t\tcallvirt instance object [mscorlib]System.Collections.Stack::Pop()\n\t\tunbox.any [mscorlib]System.Int32\n");
 		write_to_code(buffer);
 	}
 	else {
-		sprintf(buffer, "\t\tldc.i4 %s\n\t\tbox [mscorlib]System.Int32 \n", operand2);
+		sprintf(buffer, "\t\tldc.i4 %s\n\t\tbox \n", operand2);
 		write_to_code(buffer);
 	}
-	sprintf(buffer,"\t\tadd\n");
+	sprintf(buffer,"\t\tadd\n\t\tbox [mscorlib]System.Int32 \n");
 	write_to_code(buffer);
 	sprintf(buffer,"\t\tcallvirt instance void [mscorlib]System.Collections.Stack::Push(object)\n\n");  //instance = operand1 preloaded
 	write_to_code(buffer);
@@ -158,19 +158,19 @@ void resolve_minus() {
 	write_to_code(buffer);
 	sprintf(buffer, "\t\tldloc  %s\n", operand1);
 	write_to_code(buffer);
-	sprintf(buffer,"\t\tcallvirt instance object [mscorlib]System.Collections.Stack::Peek()\n");
+	sprintf(buffer,"\t\tcallvirt instance object [mscorlib]System.Collections.Stack::Peek()\n\t\tunbox.any [mscorlib]System.Int32\n");
 	write_to_code(buffer);
 	if(is_identifier(operand2)) {
 		sprintf(buffer, "\t\tldloc  %s\n", operand2);
 		write_to_code(buffer);
-		sprintf(buffer,"\t\tcallvirt instance object [mscorlib]System.Collections.Stack::Pop()\n");
+		sprintf(buffer,"\t\tcallvirt instance object [mscorlib]System.Collections.Stack::Pop()\n\t\tunbox.any [mscorlib]System.Int32\n");
 		write_to_code(buffer);
 	}
 	else {
-		sprintf(buffer, "\t\tldc.i4 %s\n\t\tbox [mscorlib]System.Int32 \n", operand2);
+		sprintf(buffer, "\t\tldc.i4 %s\n\t\tbox \n", operand2);
 		write_to_code(buffer);
 	}
-	sprintf(buffer,"\t\tsub\n");
+	sprintf(buffer,"\t\tsub\n\t\tbox [mscorlib]System.Int32 \n");
 	write_to_code(buffer);
 	sprintf(buffer,"\t\tcallvirt instance void [mscorlib]System.Collections.Stack::Push(object)\n\n");  //instance = operand1 preloaded
 	write_to_code(buffer);
@@ -286,14 +286,14 @@ void init_semantic_actions() {
 	/* 					  OPERATION LEFT					   */
 	/***********************************************************/
 	/* transition table */
-	actions_on_machine_transition[MTYPE_OPERATION_LEFT][0][MTTYPE_LESS_THAN] = save_operator;
-	actions_on_machine_transition[MTYPE_OPERATION_LEFT][0][MTTYPE_PLUS] = save_operator;
-	actions_on_machine_transition[MTYPE_OPERATION_LEFT][0][MTTYPE_MINUS] = save_operator;
+	actions_on_state_transition[MTYPE_OPERATION_LEFT][0][MTTYPE_LESS_THAN] = save_operator;
+	actions_on_state_transition[MTYPE_OPERATION_LEFT][0][MTTYPE_PLUS] = save_operator;
+	actions_on_state_transition[MTYPE_OPERATION_LEFT][0][MTTYPE_MINUS] = save_operator;
 
-	actions_on_machine_transition[MTYPE_OPERATION_LEFT][1][MTTYPE_ID] = save_operand;
-	actions_on_machine_transition[MTYPE_OPERATION_LEFT][1][MTTYPE_NUMBER] = save_operand;
+	actions_on_state_transition[MTYPE_OPERATION_LEFT][1][MTTYPE_ID] = save_operand;
+	actions_on_state_transition[MTYPE_OPERATION_LEFT][1][MTTYPE_NUMBER] = save_operand;
 
-	actions_on_machine_transition[MTYPE_OPERATION_LEFT][2][MTTYPE_QUESTION_MARK] = resolve_operation_and_continue;
+	actions_on_state_transition[MTYPE_OPERATION_LEFT][2][MTTYPE_QUESTION_MARK] = resolve_operation_and_continue;
 
 	/* machine call transitions */
 	actions_on_machine_transition[MTYPE_OPERATION_LEFT][2][MTYPE_OPERATION_RIGHT] = resolve_operation_and_continue;

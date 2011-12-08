@@ -11,6 +11,10 @@ namespace ConsoleApplication2
         {
             Auxiliar.SpecialStack<Int32> test = new Auxiliar.SpecialStack<Int32>();
             test.Push(2);
+            int a = (int) test.Pop();
+            int b = (int) test.Peek();
+            a = a + b;
+
         }
     }
 }
@@ -33,7 +37,7 @@ namespace Auxiliar
         {
             try
             {
-                return base.Pop();
+                return base.Peek();
             }
             catch (InvalidOperationException e)
             {

@@ -56,7 +56,7 @@
     {
       IL_0001:  nop
       IL_0002:  ldarg.0
-      IL_0003:  call       instance object [mscorlib]System.Collections.Stack::Pop()
+      IL_0003:  call       instance object [mscorlib]System.Collections.Stack::Peek()
       IL_0008:  stloc.1
       IL_0009:  leave.s    IL_0016
 
