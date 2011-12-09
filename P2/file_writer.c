@@ -22,13 +22,14 @@ void init_code_buffer() {
 	char buffer[128];
 
 	if (execution_enviroment != NULL)
-		while (!feof(execution_enviroment))
+		while (!feof(execution_enviroment)) {
 			fgets(buffer, sizeof(buffer), execution_enviroment);
 			if(buffer == NULL) break;
 			else {
 				printf("%s\n", buffer);
 				fputs(buffer, writer->code_buffer);
 			}
+		}
 	fclose(execution_enviroment);
 }
 

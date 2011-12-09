@@ -100,7 +100,7 @@
   .method private hidebysig static void  Main(string[] args)
   {
       .entrypoint
-      .maxstack 2
+      .maxstack 10
 
       .locals init ([0] class Auxiliar.SpecialStack<int32> a,
                     [1] class Auxiliar.SpecialStack<int32> b,
