@@ -1,0 +1,19 @@
+program
+
+main {
+	declare int num, int fat;
+	input num;
+	output num;
+
+	if(num < 0) {
+		fat = 0;
+	}
+	else {
+		fat = 1;
+		while(num > 1) {
+			fat = fat * num;
+			num = num - 1;
+		}
+	}
+	output fat;
+}
