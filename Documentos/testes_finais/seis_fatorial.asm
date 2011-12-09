@@ -170,32 +170,45 @@ cria_ra			JP  /0000		;
 
 				@ /0200
 
-; Function prettyprint
-F0			JP  /0000		;
-			LD  K0		; Carrega variavel do RA
-			MM  pos_param		;
-			SC  load_ra_pos		;
+main		JP  /0000		;
+			LD  K0		; Atribuicao de variavel
+			MM  V0		;
+			LD  V0				; Comando de output
 			MM  output_number	;
 			SC  output			;
-			LD  K0		; Carrega variavel do RA
-			MM  pos_param		;
-			SC  load_ra_pos		;
-			+  return_inst		;
-			MM  _F0		;
-_F0			K  /0000		; Guarda o endereço de retorno
-; End of function prettyprint
-
-main		JP  /0000		;
-			SC  input	; Comando de input
+			LD  K1		; Atribuicao de variavel
 			MM  V1		;
-			LD  K1		; Cria registro de ativacao
-			MM ra_tam		; 
-			LD  K2		;
-			MM  ra_end		;
-			SC  cria_ra	;
-			SC  F0		; Chama funcao
-			LD  V1		; Atribuicao de variavel
+L0			LD  zero	; Begin while loop
+			LD  V0		; Comparacao X > Y
+			-   K1		;
+			MM  T0		;
+			LD  T0		;
+			JN  _L0		;
+			JZ  _L0		;
+			LD  V1		;
+			*   V0		;
+			MM  T1		;
+			LD  T1		; Atribuicao de variavel
 			MM  V1		;
+			LD  V0		;
+			-   K2		;
+			MM  T2		;
+			LD  T2		; Atribuicao de variavel
+			MM  V0		;
+			JP  L0		;
+_L0			LD  zero	; End while loop
+			LD  V1				; Comando de output
+			MM  output_number	;
+			SC  output			;
 			HM  /00		;
 			#  P 		;
 
+		 @ /0A00
+V0			K  =0		; Declaracao de variavel
+K0			K  =6		; Declaracao de constante
+V1			K  =0		; Declaracao de variavel
+K1			K  =1		; Declaracao de constante
+T0			K  =0		; Declaracao de temporario
+T1			K  =0		; Declaracao de temporario
+K2			K  =1		; Declaracao de constante
+T2			K  =0		; Declaracao de temporario

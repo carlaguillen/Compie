@@ -1,0 +1,13 @@
+program
+
+main {
+	declare int num, int fat;
+	num = 6;
+	output num;
+	fat = 1;
+	while(num > 1) {
+		fat = fat * num;
+		num = num - 1;
+	}
+	output fat;
+}
