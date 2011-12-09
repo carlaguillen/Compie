@@ -23,11 +23,11 @@ void init_code_buffer() {
 
 	if (execution_enviroment != NULL)
 		while (!feof(execution_enviroment)) {
-			char * execution_enviroment_content = fgets(buffer, sizeof(buffer), execution_enviroment);
-			if(execution_enviroment_content == NULL) break;
+			fgets(buffer, sizeof(buffer), execution_enviroment);
+			if(buffer == NULL) break;
 			else {
-				printf("%s\n", execution_enviroment_content);
-				fputs(execution_enviroment_content, writer->code_buffer);
+				printf("%s\n", buffer);
+				fputs(buffer, writer->code_buffer);
 			}
 		}
 	fclose(execution_enviroment);
