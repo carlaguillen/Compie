@@ -144,7 +144,7 @@ void resolve_plus() {
 		write_to_code(buffer);
 	}
 	else {
-		sprintf(buffer, "\t\tldc.i4 %s\n\t\tbox \n", operand2);
+		sprintf(buffer, "\t\tldc.i4 %s\n", operand2);
 		write_to_code(buffer);
 	}
 	sprintf(buffer,"\t\tadd\n\t\tbox [mscorlib]System.Int32 \n");
@@ -167,7 +167,7 @@ void resolve_minus() {
 		write_to_code(buffer);
 	}
 	else {
-		sprintf(buffer, "\t\tldc.i4 %s\n\t\tbox \n", operand2);
+		sprintf(buffer, "\t\tldc.i4 %s\n", operand2);
 		write_to_code(buffer);
 	}
 	sprintf(buffer,"\t\tsub\n\t\tbox [mscorlib]System.Int32 \n");

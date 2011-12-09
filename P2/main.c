@@ -57,8 +57,8 @@
 
 int main(int argc, char **argv) {
 
-	init_file_reader("reverse.k");
-	init_file_writer("reverse.il");
+	init_file_reader("ENTRADA.k");
+	init_file_writer("SAIDA.il");
 	init_token();
 	init_transition_table();
 	spa_init();
