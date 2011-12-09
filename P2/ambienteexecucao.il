@@ -188,9 +188,3 @@
       stloc @
 
       // -- aqui começa a área de código
-
-
-  } // end of method Program::Main
-
-} // end of class ConsoleApplication2.Program
-
